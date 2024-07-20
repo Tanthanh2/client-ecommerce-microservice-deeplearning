@@ -1,6 +1,6 @@
 # Dự án Shopee Clone Typescript
 ## run application
-- 1.clone repo
+- 1. clone repo
 - 2. npm i
 - 3. npm run dev
 - 4. http://localhost:3000
