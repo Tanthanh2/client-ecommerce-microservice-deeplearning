@@ -5,6 +5,7 @@ import { toast } from 'react-toastify'
 import { useNavigate } from 'react-router-dom';
 import authApi from 'src/apis/auth.api'
 import purchaseApi from 'src/apis/purchase.api'
+import userApi from 'src/apis/user.api'
 import noproduct from 'src/assets/images/no-product.png'
 import path from 'src/constants/path'
 import { purchasesStatus } from 'src/constants/purchase'
@@ -21,7 +22,6 @@ interface SearchResult {
   name: string;
 }
 export default function Header() {
-
 
 
 
@@ -91,14 +91,19 @@ export default function Header() {
   const logoutMutation = useMutation(authApi.logoutAccount)
   // handle logout mutate
   const handleLogout = () => {
+        
+    localStorage.removeItem('accessToken')
+    localStorage.removeItem('refreshToken')
+    localStorage.removeItem('profile')
+    setIsAuthenticated(false)
+    setProfile(null)
+    toast.success('Logout success')
+    
     logoutMutation.mutate(undefined, {
       onSuccess: () => {
-        setIsAuthenticated(false)
-        setProfile(null)
-        toast.success('Logout success')
+
         // case : when logout then remove all queries. if not, although logout but still have data in cache at the Cart
         // The removeQueries method can be used to remove queries from the cache based on their query keys or any other functionally accessible property/state of the query.
-        queryClient.removeQueries(['purchases', { status: purchasesStatus.inCart }])
       }
     })
   }
@@ -108,14 +113,33 @@ export default function Header() {
   }
 
   const handleNavLinkClick = () => {
-    // Handle onClick event here
-    console.log('NavLink clicked');
-    // You can add more logic here if needed
+
     fecthShopCheck()
   };
 
+        // Example POST request
+        const id = localStorage.getItem('id');
+        const userId = id !== null ? parseInt(id) : 0;
+  const checkShopExistsMutation = useMutation({
+    mutationFn: () => userApi.checkexitsshop(userId),
+    onSuccess: (data) => {
+        if (data.data != 0) {
+            localStorage.setItem('shopId', data.data.toString());
+            toast.success('Shop exists for this seller');
+            navigate('/seller/order');
+        } else {
+            toast.warning('Shop does not exist for this seller');
+            navigate('/seller-shop-register');
+        }
+    },
+    onError: (error) => {
+        toast.error('Error checking shop existence');
+    }
+});
+
+
   const fecthShopCheck = async () => {
-    navigate('/seller-shop-register');
+    checkShopExistsMutation.mutate(); // Gọi hàm kiểm tra shop
 };
 
 
@@ -212,7 +236,7 @@ export default function Header() {
               >
                 <div className='mr-2 h-5 w-5 flex-shrink-0'>
                   <img
-                    src={getAvatarUrl(profile?.avatar)}
+                    src="https://ps.w.org/user-avatar-reloaded/assets/icon-256x256.png?rev=2540745"
                     alt='avatar'
                     className='h-full w-full rounded-full object-cover'
                   />

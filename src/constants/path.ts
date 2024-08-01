@@ -1,4 +1,3 @@
-import { order } from "./product"
 
 const path = {
   home: '/',

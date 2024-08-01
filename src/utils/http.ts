@@ -22,8 +22,11 @@ export class Http {
     // because when getdata from localstorage(hard drive) ALWAYS SLOWER than get accessToken from (Ram)
     this.accessToken = getAccessTokenFromLS()
     this.refreshToken = getRefreshTokenFromLS()
+
     this.instance = axios.create({
-      baseURL: 'https://api-ecom.duthanhduoc.com/',
+      baseURL:  'http://localhost:8222',
+      // 'https://api-ecom.duthanhduoc.com/',
+
       headers: {
         'Content-Type': 'application/json'
         // 'expire-access-token': 10,
@@ -34,7 +37,7 @@ export class Http {
     this.instance.interceptors.request.use(
       (config) => {
         if (this.accessToken && config.headers) {
-          config.headers.authorization = this.accessToken
+          config.headers.authorization = "Bearer " +  this.accessToken
           return config
         }
         return config
@@ -51,6 +54,7 @@ export class Http {
         if (url?.includes(URL_LOGIN) || url?.includes(URL_REGISTER)) {
           console.log('response', response)
           const dataResponse = response.data as AuthResponse
+          localStorage.setItem('id', dataResponse.data.user.id.toString())
           this.accessToken = dataResponse.data.access_token
           this.refreshToken = dataResponse.data.refresh_token
           setAccessTokenToLS(this.accessToken)

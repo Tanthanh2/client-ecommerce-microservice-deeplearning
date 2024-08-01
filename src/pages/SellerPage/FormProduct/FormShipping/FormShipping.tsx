@@ -1,6 +1,11 @@
 import React from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
+import { ProductRequest } from 'src/constants/contant';
 
+interface FormBasicProps {
+  formData: ProductRequest;
+  onFormDataChange: (newData: Partial<ProductRequest>) => void;
+}
 
 interface FormInputs {
   weight: number;
@@ -9,19 +14,30 @@ interface FormInputs {
   width: number;
 }
 
-export default function FormShipping() {
+const FormShipping: React.FC<FormBasicProps> = ({ formData, onFormDataChange }) => {
 
-  const { register, handleSubmit, formState: { errors } } = useForm<FormInputs>();
+  const { register, handleSubmit, formState: { errors }, watch } = useForm<FormInputs>();
+  const formValues = watch();
 
-  const onSubmit: SubmitHandler<FormInputs> = data => {
-    console.log(data);
+  const handleSave = async (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault(); // Ngăn chặn hành vi submit của form
+
+
+    const formData = {
+      weight: formValues.weight,
+      height: formValues.height,
+      length: formValues.length,
+      width: formValues.width,
+    };
+    console.log(formData);
+    onFormDataChange(formData);
   };
 
 
   return (
     <div className="m-2 p-2 border-spacing-44 border-red-300 border">
         <h1>THÔNG TIN VẬN CHUYỂN</h1>
-        <form onSubmit={handleSubmit(onSubmit)} className="p-4 space-y-4">
+        <form  className="p-4 space-y-4">
       <div>
         <label className="block text-gray-700">Thông tin cân nặng sau khi đóng gói (kg)</label>
         <input
@@ -62,8 +78,8 @@ export default function FormShipping() {
       </div>
 
       <div className="flex justify-end">
-        <button type="submit" className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
-          Lưu
+        <button type="button" onClick={handleSave} className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+          Ấn để xác nhận
         </button>
       </div>
     </form>
@@ -71,3 +87,4 @@ export default function FormShipping() {
     </div>
   )
 }
+export default FormShipping;

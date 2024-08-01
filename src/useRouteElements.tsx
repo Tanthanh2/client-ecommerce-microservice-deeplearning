@@ -47,7 +47,7 @@ export default function useRouteElements() {
   const routeElements = useRoutes([
     {
       path: '',
-      element: <RejectedRoute />,
+      element: <ProtectedRoute />,
       children: [
         {
           path: path.order,

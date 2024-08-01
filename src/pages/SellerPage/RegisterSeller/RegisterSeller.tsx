@@ -2,7 +2,11 @@ import React, { useState, useEffect } from 'react';
 import Button from 'src/components/Button'
 import Input from 'src/components/Input'
 import axios from 'axios';
+import { useMutation } from '@tanstack/react-query'
+import userApi from 'src/apis/user.api'
 import { City, District, Ward } from 'src/constants/contant'
+import { ShopData } from 'src/constants/contant';
+import { toast } from 'react-toastify'
 
 
 export default function RegisterSeller() {
@@ -14,6 +18,9 @@ export default function RegisterSeller() {
   const [selectedWard, setSelectedWard] = useState<string>('');
   const [specificAddress, setSpecificAddress] = useState('');
 
+  const [shopName, setShopName] = useState<string>('');
+  const [businessType, setBusinessType] = useState<string>('');
+  const [shopDescription, setShopDescription] = useState<string>('');
 
   useEffect(() => {
     const fetchData = async () => {
@@ -85,9 +92,46 @@ export default function RegisterSeller() {
     setSelectedWard(e.target.value);
   };
 
+ // Define the mutation
+ const mutation = useMutation(userApi.registerShop, {
+  onSuccess: (data) => {
+    console.log('Shop registered successfully:', data);
+    // Handle successful registration (e.g., redirect or show notification)
+    toast.success("Đăng kí shop thành công");
+    localStorage.setItem('shopId', data.data.id ? data.data.id.toString() : "0");
 
+  },
+  onError: (error) => {
+    console.error('Error registering shop:', error);
+    toast.success("Đăng kí shop không thành công");
 
+    // Handle registration error
+  }
+});
 
+  const handleRegister = async () => {
+    const id = localStorage.getItem('id');
+    const userId = id !== null ? parseInt(id) : 0;
+    const shopData: ShopData = {
+      name: shopName,
+      type: businessType,
+      description: shopDescription,
+      city: selectedCity.split("_")[0],
+      district: selectedDistrict.split("_")[0],
+      ward: selectedWard.split("_")[0],
+      detailLocation: specificAddress,
+      seller: userId
+    };
+
+    if (!shopName || !businessType || !shopDescription || !selectedCity || !selectedDistrict || !selectedWard || !specificAddress) {
+      toast.error('Vui lòng điền đầy đủ thông tin.');
+      return;
+    }
+
+    console.log(shopData)
+    mutation.mutate(shopData);
+
+  };
 
 
   return (
@@ -101,25 +145,25 @@ export default function RegisterSeller() {
                 className='mt-6'
                 type='text'
                 placeholder='Tên shop'
-                name='nameShop'
-                // register={register}
-                // errorMessage={errors.email?.message}
+                name='name'
+                value={shopName}
+                onChange={(e) => setShopName(e.target.value)}
               />
               <Input
                 className='my-2'
                 type='text'
                 placeholder='Loại hình kinh doanh'
-                name='typeBusiness'
-                // register={register}
-                // errorMessage={errors.password?.message}
+                name='type'
+                value={businessType}
+                onChange={(e) => setBusinessType(e.target.value)}
               />
               <Input
                 className='my-2'
                 type='text'
                 placeholder='Mô tả shop'
-                name='shopDescription'
-                // register={register}
-                // errorMessage={errors.password?.message}
+                name='description'
+                value={shopDescription}
+                onChange={(e) => setShopDescription(e.target.value)}
               />
 
               <div>
@@ -158,14 +202,14 @@ export default function RegisterSeller() {
     ))}
   </select>
 
-</div>
+              </div>
               <Input
                 className='my-2'
                 type='text'
                 placeholder='Địa chỉ cụ thể'
-                name='detailAddress'
-                // register={register}
-                // errorMessage={errors.password?.message}
+                name='detailLocation'
+                value={specificAddress}
+                onChange={(e) => setSpecificAddress(e.target.value)}
               />
 
 
@@ -173,6 +217,7 @@ export default function RegisterSeller() {
                 type='button'
                 // isLoading={loginAccountMutation.isLoading}
                 // disabled={loginAccountMutation.isLoading}
+                onClick={handleRegister}
                 className='flex w-full justify-center bg-red-500 px-2 py-4 text-sm uppercase text-white hover:bg-red-600'
               >
                 Đăng ký Shop

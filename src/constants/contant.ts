@@ -1,3 +1,51 @@
+interface SizeQuantityRequest {
+  id: number;
+  size: string;
+  color: string;
+  quantity: number;
+}
+
+export interface ProductRequest {
+  id?: number; // Optional if not provided
+
+  images: string[];
+  name: string;
+  description: string;
+  categoryId: number;
+  image?: string; // Optional, default value is an empty string
+
+
+  shortDescription: string;
+
+
+  length: number;
+  width: number;
+  hight: number; // Note: Consider renaming to height for consistency
+  weight: number;
+
+  price: number;
+  priceBeforeDiscount: number;
+  quantity: number; // Optional, default value is 0
+  sizeQuantities?: SizeQuantityRequest[]; // Optional if not provided
+  
+  idShop: number;
+}
+
+
+
+export interface ShopData {
+  id?: number | null;
+  name: string;
+  type: string;
+  description: string;
+  city: string;
+  district: string;
+  ward: string;
+  detailLocation: string;
+  seller?: number;
+}
+
+
 export interface City  {
     ProvinceID: number;
     ProvinceName: string;

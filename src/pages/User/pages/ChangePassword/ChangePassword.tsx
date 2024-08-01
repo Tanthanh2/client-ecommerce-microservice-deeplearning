@@ -1,6 +1,5 @@
 import { yupResolver } from '@hookform/resolvers/yup'
 import { useMutation } from '@tanstack/react-query'
-import omit from 'lodash/omit'
 import { useForm } from 'react-hook-form'
 import { toast } from 'react-toastify'
 import userApi from 'src/apis/user.api'
@@ -10,9 +9,12 @@ import { ErrorResponse } from 'src/types/utils.type'
 import { userSchema, UserSchema } from 'src/utils/rules'
 import { isAxiosUnprocessableEntityError } from 'src/utils/utils'
 
-type FormData = Pick<UserSchema, 'password' | 'new_password' | 'confirm_password'>
 const passwordSchema = userSchema.pick(['password', 'new_password', 'confirm_password'])
-
+interface FormData {
+  password: string; // Required
+  new_password: string; // Required
+  confirm_password: string; // Required
+}
 export default function ChangePassword() {
   const {
     register,
@@ -28,13 +30,16 @@ export default function ChangePassword() {
     },
     resolver: yupResolver(passwordSchema)
   })
-  const updateProfileMutation = useMutation(userApi.updateProfile)
+  const id = localStorage.getItem('id');
+  const userId = id !== null ? parseInt(id) : 0;
+  const updateProfileMutation = useMutation((body: FormData) => userApi.changepassword(body, userId));
 
   const onSubmit = handleSubmit(async (data) => {
+    console.log(data)
     try {
-      const res = await updateProfileMutation.mutateAsync(omit(data, ['confirm_password']))
-      toast.success(res.data.message)
-      reset()
+      const res = await updateProfileMutation.mutateAsync(data);
+      toast.success(res.data);
+      reset();
     } catch (error) {
       if (isAxiosUnprocessableEntityError<ErrorResponse<FormData>>(error)) {
         const formError = error.response?.data.data

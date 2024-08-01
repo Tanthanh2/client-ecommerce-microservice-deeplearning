@@ -3,9 +3,10 @@ import { useMutation, useQuery } from '@tanstack/react-query'
 import { Fragment, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { Controller, FormProvider, useForm, useFormContext } from 'react-hook-form'
 import { toast } from 'react-toastify'
-
+import { City, District, Ward } from 'src/constants/contant'
 import Button from 'src/components/Button'
 import Input from 'src/components/Input'
+import axios from 'axios';
 
 import InputNumber from 'src/components/InputNumber'
 import { AppContext } from 'src/contexts/app.context'
@@ -17,6 +18,7 @@ import InputFile from 'src/components/InputFile'
 import { UserSchema, userSchema } from 'src/utils/rules'
 import { getAvatarUrl, isAxiosUnprocessableEntityError } from 'src/utils/utils'
 import DateSelect from '../../components/DateSelect'
+import { u } from 'msw/lib/glossary-de6278a9'
 
 function Info() {
   const {
@@ -26,12 +28,6 @@ function Info() {
   } = useFormContext<FormData>()
   return (
     <Fragment>
-      <div className='mt-6 flex flex-col flex-wrap sm:flex-row'>
-        <div className='truncate pt-3 capitalize sm:w-[20%] sm:text-right'>Tên</div>
-        <div className='sm:w-[80%] sm:pl-5'>
-          <Input register={register} name='name' placeholder='Tên' errorMessage={errors.name?.message} />
-        </div>
-      </div>
       <div className='mt-2 flex flex-col flex-wrap sm:flex-row'>
         <div className='truncate pt-3 capitalize sm:w-[20%] sm:text-right'>Số điện thoại</div>
         <div className='sm:w-[80%] sm:pl-5'>
@@ -70,6 +66,88 @@ const profileSchema = userSchema.pick(['name', 'address', 'phone', 'date_of_birt
 // Nhấn submit thì tiến hành upload lên server, nếu upload thành công thì tiến hành gọi api updateProfile
 
 export default function Profile() {
+
+
+  const [cities, setCities] = useState<City[]>([]);
+  const [selectedCity, setSelectedCity] = useState<string>('');
+  const [districts, setDistricts] = useState<District[]>([]);
+  const [selectedDistrict, setSelectedDistrict] = useState<string>('');
+  const [wards, setWards] = useState<Ward[]>([]);
+  const [selectedWard, setSelectedWard] = useState<string>('');
+  const [specificAddress, setSpecificAddress] = useState('');
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axios.get<any>('https://online-gateway.ghn.vn/shiip/public-api/master-data/province',{
+          headers: {
+            'token': '5b44734c-e7ae-11ee-8529-6a2e06bbae55'
+          }
+        });
+        setCities(response.data.data);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
+
+    fetchData();
+  }, []);
+  
+  const handleCityChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const cityId = e.target.value.split("_")[1];
+    setSelectedCity(e.target.value);
+    console.log('Selected city:', cityId);
+    fetchDatadistrict(cityId)
+
+  };
+
+  const fetchDatadistrict = async (id: any) => {
+    try {
+      const response = await axios.get<any>(
+        'https://online-gateway.ghn.vn/shiip/public-api/master-data/district',
+        {
+          headers: {
+            'token': '5b44734c-e7ae-11ee-8529-6a2e06bbae55'
+          },
+          params: {
+            province_id: id
+          }
+        }
+      );
+      setDistricts(response.data.data);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  };
+  const handleDistrictChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const districtId = e.target.value.split("_")[1];
+    setSelectedDistrict(e.target.value);
+    fetchDataward(districtId)
+  };
+  const fetchDataward = async (id: any) => {
+    try {
+      const response = await axios.get<any>(
+        'https://online-gateway.ghn.vn/shiip/public-api/master-data/ward',
+        {
+          headers: {
+            'token': '5b44734c-e7ae-11ee-8529-6a2e06bbae55'
+          },
+          params: {
+            district_id : id
+          }
+        }
+      );
+      setWards(response.data.data);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  };
+  const handleWardChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedWard(e.target.value);
+  };
+
+
+
   const { setProfile } = useContext(AppContext)
   const [file, setFile] = useState<File>()
 
@@ -77,17 +155,20 @@ export default function Profile() {
     return file ? URL.createObjectURL(file) : ''
   }, [file])
 
+  const id = localStorage.getItem('id');
+  const userId = id !== null ? parseInt(id) : 0;
   const { data: profileData, refetch } = useQuery({
-    queryKey: ['profile'],
-    queryFn: userApi.getProfile
+    queryKey: ['profile', userId],
+    queryFn: () => userApi.getProfile(userId)
   })
   const profile = profileData?.data.data
 
-  const updateProfileMutation = useMutation(userApi.updateProfile)
+  const updateProfileMutation = useMutation((body: BodyUpdateProfile) => userApi.updateProfile(body, userId));
+
+
   const uploadAvatarMutaion = useMutation(userApi.uploadAvatar)
   const methods = useForm<FormData>({
     defaultValues: {
-      name: '',
       phone: '',
       address: '',
       avatar: '',
@@ -107,46 +188,60 @@ export default function Profile() {
 
   const avatar = watch('avatar')
 
+
+  interface BodyUpdateProfile {
+    phone: string | undefined;
+    city: string | undefined;
+    district: string | undefined;
+    ward: string | undefined;
+    detailLocation: string | undefined;
+  }
+  
+
   useEffect(() => {
     if (profile) {
-      setValue('name', profile.name)
+      console.log(profile);
+      setValue('name', profile.email)
       setValue('phone', profile.phone)
-      setValue('address', profile.address)
-      setValue('avatar', profile.avatar)
-      setValue('date_of_birth', profile.date_of_birth ? new Date(profile.date_of_birth) : new Date(1990, 0, 1))
+      setValue('address', profile.detailLocation)
     }
   }, [profile, setValue])
+
   const onSubmit = handleSubmit(async (data) => {
+    event?.preventDefault();
     try {
-      let avatarName = avatar
-      if (file) {
-        const form = new FormData()
-        form.append('image', file)
-        const uploadRes = await uploadAvatarMutaion.mutateAsync(form)
-        avatarName = uploadRes.data.data
-        setValue('avatar', avatarName)
+    const bodyUpdateProfile: BodyUpdateProfile = {
+      phone: data.phone,
+      city: selectedCity.split("_")[0],
+      district: selectedDistrict.split("_")[0],
+      ward: selectedWard.split("_")[0],
+      detailLocation: data.address
+    };
+    console.log(bodyUpdateProfile);
+
+    const res = await updateProfileMutation.mutateAsync(bodyUpdateProfile);
+    toast.success('Cập nhật hồ sơ thành công');
+    setProfile(res.data.data);
+    setProfileToLS(res.data.data);
+    refetch();
+  } catch (error) {
+    if (isAxiosUnprocessableEntityError<ErrorResponse<FormDataError>>(error)) {
+      const formError = error.response?.data.data;
+      if (formError) {
+        Object.keys(formError).forEach((key) => {
+          setError(key as keyof FormDataError, {
+            message: formError[key as keyof FormDataError],
+            type: 'Server'
+          });
+        });
       }
-      const res = await updateProfileMutation.mutateAsync({
-        ...data,
-        date_of_birth: data.date_of_birth?.toISOString(),
-        avatar: avatarName
-      })
-      setProfile(res.data.data)
-      setProfileToLS(res.data.data)
-      refetch()
-      toast.success(res.data.message)
-    } catch (error) {
-      console.log(error)
-      if (isAxiosUnprocessableEntityError<ErrorResponse<FormDataError>>(error)) {
-        const formError = error.response?.data.data
-        if (formError) {
-          Object.keys(formError).forEach((key) => {
-            setError(key as keyof FormData, { message: formError[key as keyof FormData], type: 'Server' })
-          })
-        }
-      }
+    } else {
+      console.error('Error updating profile:', error);
+      toast.error('Cập nhật hồ sơ thất bại');
     }
-  })
+  }
+  });
+  
 
   const handleChangeFile = (file?: File | undefined) => {
     setFile(file)
@@ -167,17 +262,53 @@ export default function Profile() {
               </div>
             </div>
             <Info />
+            <div className="flex flex-col items-center space-y-4">
+  <select 
+    value={selectedCity} 
+    onChange={handleCityChange} 
+    className="w-full p-2 rounded border border-gray-300 focus:outline-none focus:border-blue-500"
+  >
+    <option value="">Chọn tỉnh thành</option>
+    {cities.map(city => (
+      <option key={city.ProvinceID} value={`${city.ProvinceName}_${city.ProvinceID}`}>{city.ProvinceName}</option>
+    ))}
+  </select>
+  <select 
+    value={selectedDistrict} 
+    onChange={handleDistrictChange} 
+    className="w-full p-2 rounded border border-gray-300 focus:outline-none focus:border-blue-500"
+  >
+    <option value="">Chọn quận huyện</option>
+    {districts.map(district => (
+      <option key={district.DistrictID} value={`${district.DistrictName}_${district.DistrictID}`}>{district.DistrictName}</option>
+    ))}
+  </select>
+  <select 
+    value={selectedWard} 
+    onChange={handleWardChange} 
+    className="w-full p-2 rounded border border-gray-300 focus:outline-none focus:border-blue-500"
+  >
+    <option value="">Chọn phường xã</option>
+    {wards.map(ward => (
+      <option key={ward.WardCode} value={`${ward.WardName}_${ward.WardCode}`}>{ward.WardName}</option>
+    ))}
+  </select>
+
+              </div>
             <div className='mt-2 flex flex-col flex-wrap sm:flex-row'>
-              <div className='truncate pt-3 capitalize sm:w-[20%] sm:text-right'>Địa chỉ</div>
+              <div className='truncate pt-3 capitalize sm:w-[20%] sm:text-right'>Địa chỉ chi tiết</div>
               <div className='sm:w-[80%] sm:pl-5'>
                 <Input
                   classNameInput='w-full rounded-sm border border-gray-300 px-3 py-2 outline-none focus:border-gray-500 focus:shadow-sm'
                   register={register}
                   name='address'
-                  placeholder='Địa chỉ'
+                  placeholder='Địa chỉ chi tiết'
                   errorMessage={errors.address?.message}
                 />
               </div>
+            </div>
+            <div className='mt-2 flex flex-col flex-wrap sm:flex-row'>
+              <span>{profile?.city} - {profile?.district} - {profile?.ward} - {profile?.detailLocation} </span>
             </div>
             <Controller
               control={control}

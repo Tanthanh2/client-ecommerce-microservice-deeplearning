@@ -35,6 +35,7 @@ export default function Login() {
   // handle submit
   const onSubmit = handleSubmit(
     (data) => {
+      console.log('data', data)
       loginAccountMutation.mutate(data, {
         onSuccess: (data) => {
           console.log('data', data.data.data)
