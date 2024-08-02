@@ -1,10 +1,13 @@
-import React from 'react';
+import React , {useEffect}from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { ProductRequest } from 'src/constants/contant';
 
 interface FormBasicProps {
-  formData: ProductRequest;
+  formData: FormData;
   onFormDataChange: (newData: Partial<ProductRequest>) => void;
+  isUpdate: boolean;
+  idProduct: string;
+
 }
 interface FormInputs {
   brand: string;
@@ -21,8 +24,8 @@ interface FormData {
   shortDescription: string;
 }
 
-const FormDetail: React.FC<FormBasicProps> = ({ formData, onFormDataChange }) => {
-  const { register, handleSubmit, formState: { errors }, watch } = useForm<FormInputs>();
+const FormDetail: React.FC<FormBasicProps> = ({ formData, onFormDataChange, isUpdate , idProduct}) => {
+  const { register, handleSubmit, formState: { errors }, watch, setValue } = useForm<FormInputs>();
   const formValues = watch();
 
  // Hàm xử lý lưu dữ liệu
@@ -31,9 +34,31 @@ const FormDetail: React.FC<FormBasicProps> = ({ formData, onFormDataChange }) =>
   const formData: FormData = {
     shortDescription: concatenatedData,
   };
-  console.log(formData);
+
   onFormDataChange(formData); // Gọi hàm onFormDataChange với dữ liệu mới
 };
+
+const handleUpdate = async (event: React.MouseEvent<HTMLButtonElement>) => {
+  event.preventDefault(); // Ngăn chặn hành vi submit của form
+
+
+};
+
+
+// Populate form fields when isUpdate is true
+useEffect(() => {
+  if (isUpdate) {
+    let formList = formData.shortDescription.split('_');
+    setValue('brand', formList[0]);
+    setValue('manufacturer', formList[1]);
+    setValue('material', formList[2]);
+    setValue('ingredients', formList[3]);
+    setValue('productionAddress', formList[4]);
+    setValue('productionDate', formList[5]);
+    setValue('expirationDate', formList[6]);
+    setValue('warrantyInfo', formList[7]);
+  }
+}, [isUpdate, formData, setValue]);
 
   return (
     <div className="m-2 p-2 border-spacing-44 border-red-300 border">
@@ -121,9 +146,15 @@ const FormDetail: React.FC<FormBasicProps> = ({ formData, onFormDataChange }) =>
           </div>
 
           <div className="md:col-span-2 flex justify-end">
+          {!isUpdate ? (
             <button type="button" onClick={handleSave} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-              Ấn lưu trước khi chuyển sang trang tiếp theo
+              Ấn Lưu trước khi chuyển
             </button>
+          ) : (
+            <button type="button" onClick={handleUpdate} className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+              Cập nhật sản phẩm
+            </button>
+          )}
           </div>
         </form>
       </div>

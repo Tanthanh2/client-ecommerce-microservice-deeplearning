@@ -20,7 +20,7 @@ export interface ProductRequest {
 
   length: number;
   width: number;
-  hight: number; // Note: Consider renaming to height for consistency
+  height: number; // Note: Consider renaming to height for consistency
   weight: number;
 
   price: number;

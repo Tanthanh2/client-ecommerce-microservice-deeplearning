@@ -1,13 +1,16 @@
-import React from 'react';
+import React ,{useEffect}from 'react';
 import { useForm, useFieldArray, SubmitHandler } from 'react-hook-form';
 import { ProductRequest } from 'src/constants/contant';
 
 interface FormBasicProps {
-  formData: ProductRequest;
+  formData: FormInputs;
   onFormDataChange: (newData: Partial<ProductRequest>) => void;
+  isUpdate: boolean;
+  idProduct: string;
+
 }
 interface SizeQuantity {
-  id: number;
+  id: number | null;
   size: string;
   color: string;
   quantity: number;
@@ -15,15 +18,15 @@ interface SizeQuantity {
 
 interface FormInputs {
   price: number;
-  priceBeforeDiscount: 0;
+  priceBeforeDiscount: number;
   quantity: number;
   sizeQuantities: SizeQuantity[] | null;
 }
 
-const FormPurchase: React.FC<FormBasicProps> = ({ formData, onFormDataChange }) => {
-  const { register, control, handleSubmit, watch, formState: { errors },  } = useForm<FormInputs>({
+const FormPurchase: React.FC<FormBasicProps> = ({ formData, onFormDataChange, isUpdate, idProduct }) => {
+  const { register, control, handleSubmit, watch, formState: { errors }, setValue } = useForm<FormInputs>({
     defaultValues: {
-      sizeQuantities: [{ id: Date.now(), size: '', color: '', quantity: 0 }],
+      sizeQuantities: [{ id: null, size: '', color: '', quantity: 0 }],
       quantity: 0,
     }
   });
@@ -44,9 +47,33 @@ const FormPurchase: React.FC<FormBasicProps> = ({ formData, onFormDataChange }) 
     } else {
       data.sizeQuantities = []; // Đặt thành một mảng rỗng nếu không có size
     }
-    console.log(data);
     onFormDataChange(data as Partial<ProductRequest>); // Cast về Partial<ProductRequest>
   };
+// Populate form fields when isUpdate is true
+useEffect(() => {
+  if (isUpdate) {
+    setValue('price', formData.price);
+    setValue('priceBeforeDiscount', formData.priceBeforeDiscount);
+    setValue('quantity', formData.quantity);
+    
+    if (formData.sizeQuantities) {
+      // Clear existing fields and set the new values
+      remove(); // Remove existing size quantities
+      formData.sizeQuantities.forEach(sizeQuantity => {
+        append(sizeQuantity); // Append each size quantity to the field array
+      });
+    } else {
+      remove(); // If no sizeQuantities, ensure it's empty
+    }
+  }
+}, [isUpdate, formData, setValue, append, remove]);
+
+
+const handleUpdate = async (event: React.MouseEvent<HTMLButtonElement>) => {
+  event.preventDefault(); // Ngăn chặn hành vi submit của form
+
+
+};
 
   return (
     <div className="m-2 p-2 border-spacing-44 border-red-300 border">
@@ -69,7 +96,7 @@ const FormPurchase: React.FC<FormBasicProps> = ({ formData, onFormDataChange }) 
             <div className="flex items-center">
               <input
                 type="checkbox"
-                checked={hasSize}
+                checked={hasSize ? true : false}
                 onChange={() => {
                   if (hasSize) {
                     remove();
@@ -128,7 +155,7 @@ const FormPurchase: React.FC<FormBasicProps> = ({ formData, onFormDataChange }) 
 
               <button
                 type="button"
-                onClick={() => append({ id: Date.now(), size: '', color: '', quantity: 0 })}
+                onClick={() => append({ id: null, size: '', color: '', quantity: 0 })}
                 className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
               >
                 Add Size
@@ -147,9 +174,15 @@ const FormPurchase: React.FC<FormBasicProps> = ({ formData, onFormDataChange }) 
           )}
 
           <div className="flex justify-end">
-            <button type="button" onClick={handleSave} className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
-              Lưu
+          {!isUpdate ? (
+            <button type="button" onClick={handleSave} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+              Ấn Lưu trước khi chuyển
             </button>
+          ) : (
+            <button type="button" onClick={handleUpdate} className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+              Cập nhật sản phẩm
+            </button>
+          )}
           </div>
         </form>
       </div>

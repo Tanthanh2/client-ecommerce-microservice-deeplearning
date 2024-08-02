@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import categoryApi from 'src/apis/categoriest';
 import { useQuery } from '@tanstack/react-query';
@@ -8,8 +8,10 @@ import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { ProductRequest } from 'src/constants/contant';
 
 interface FormBasicProps {
-  formData: ProductRequest;
+  formData: FormInputs;
   onFormDataChange: (newData: Partial<ProductRequest>) => void;
+  isUpdate: boolean;
+  idProduct: string;
 }
 
 interface FormInputs {
@@ -20,7 +22,7 @@ interface FormInputs {
   image: string;
 }
 
-const ProductForm: React.FC<FormBasicProps> = ({ formData, onFormDataChange }) => {
+const ProductForm: React.FC<FormBasicProps> = ({ formData, onFormDataChange , isUpdate, idProduct}) => {
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [files, setFiles] = useState<FileList | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
@@ -62,7 +64,20 @@ const ProductForm: React.FC<FormBasicProps> = ({ formData, onFormDataChange }) =
     }
   };
 
-  const { register, handleSubmit, formState: { errors } ,watch } = useForm<FormInputs>();
+  const { register, handleSubmit, formState: { errors } ,watch, setValue } = useForm<FormInputs>();
+
+  // Populate form fields when isUpdate is true
+  useEffect(() => {
+    if (isUpdate) {
+      setValue('name', formData.name);
+      setValue('description', formData.description);
+      setValue('categoryId', formData.categoryId);
+      setImagePreviews(formData.images);
+      setFiles(null); // Reset files if any are present
+    }
+  }, [isUpdate, formData, setValue]);
+
+
   // Theo dõi dữ liệu form
   const formValues = watch();
   const handleSave = async (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -84,7 +99,6 @@ const ProductForm: React.FC<FormBasicProps> = ({ formData, onFormDataChange }) =
       image: uploadedImages[0], // Use the first uploaded image as the main image
     };
 
-    console.log(data1);
     onFormDataChange(data1);
   };
 
@@ -97,6 +111,14 @@ const ProductForm: React.FC<FormBasicProps> = ({ formData, onFormDataChange }) =
 
   if (isLoading) return <p>Loading categories...</p>;
   if (error) return <p>Error loading categories</p>;
+  const handleUpdate = async (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault(); // Ngăn chặn hành vi submit của form
+    console.log(idProduct)
+
+
+
+  };
+
 
   return (
     <div className="m-2 p-2 border-spacing-44 border-red-300 border">
@@ -171,10 +193,21 @@ const ProductForm: React.FC<FormBasicProps> = ({ formData, onFormDataChange }) =
             {errors.categoryId && <span className="text-red-500">This field is required</span>}
           </div>
 
+
+          <div className="md:col-span-2 flex justify-end">
+                
           {loading && <TailSpin height="50" width="50" color="blue" ariaLabel="loading" />}
-          <button type="button" onClick={handleSave} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-            Ấn Lưu trước khi chuyển
-          </button>
+          {!isUpdate ? (
+            <button type="button" onClick={handleSave} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+              Ấn Lưu trước khi chuyển
+            </button>
+          ) : (
+            <button type="button" onClick={handleUpdate} className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+              Cập nhật sản phẩm
+            </button>
+          )}
+              </div>
+
         </form>
       </div>
     </div>

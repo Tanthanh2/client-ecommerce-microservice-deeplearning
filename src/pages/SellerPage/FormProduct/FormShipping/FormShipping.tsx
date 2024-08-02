@@ -1,10 +1,13 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { ProductRequest } from 'src/constants/contant';
 
 interface FormBasicProps {
-  formData: ProductRequest;
+  formData: FormInputs;
   onFormDataChange: (newData: Partial<ProductRequest>) => void;
+  isUpdate: boolean;
+  idProduct: string
+
 }
 
 interface FormInputs {
@@ -14,10 +17,19 @@ interface FormInputs {
   width: number;
 }
 
-const FormShipping: React.FC<FormBasicProps> = ({ formData, onFormDataChange }) => {
+const FormShipping: React.FC<FormBasicProps> = ({ formData, onFormDataChange, isUpdate ,idProduct}) => {
 
-  const { register, handleSubmit, formState: { errors }, watch } = useForm<FormInputs>();
+  const { register, handleSubmit, formState: { errors }, watch, setValue } = useForm<FormInputs>();
   const formValues = watch();
+  useEffect(() => {
+    if (isUpdate) {
+
+      setValue('weight', formData.weight);
+      setValue('height', formData.height);
+      setValue('length', formData.length);
+      setValue('width', formData.width);
+    }
+  }, [formData]);
 
   const handleSave = async (event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault(); // Ngăn chặn hành vi submit của form
@@ -29,9 +41,16 @@ const FormShipping: React.FC<FormBasicProps> = ({ formData, onFormDataChange }) 
       length: formValues.length,
       width: formValues.width,
     };
-    console.log(formData);
     onFormDataChange(formData);
   };
+
+
+  const handleUpdate = async (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault(); // Ngăn chặn hành vi submit của form
+
+
+  };
+
 
 
   return (
@@ -78,9 +97,15 @@ const FormShipping: React.FC<FormBasicProps> = ({ formData, onFormDataChange }) 
       </div>
 
       <div className="flex justify-end">
-        <button type="button" onClick={handleSave} className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
-          Ấn để xác nhận
-        </button>
+      {!isUpdate ? (
+            <button type="button" onClick={handleSave} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+              Ấn Lưu trước khi chuyển
+            </button>
+          ) : (
+            <button type="button" onClick={handleUpdate} className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+              Cập nhật sản phẩm
+            </button>
+          )}
       </div>
     </form>
 

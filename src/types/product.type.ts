@@ -1,25 +1,49 @@
 export interface Product {
-  _id: string
-  images: string[]
-  price: number
-  rating: number
-  price_before_discount: number
-  quantity: number
-  sold: number
-  view: number
-  name: string
-  description:string 
-    
-  category: {
-    _id: string
-    name: string
-  }
-  image: string
-
-  createdAt: string
-  updatedAt: string
+  id: number;
+  images: string[];
+  price: number;
+  priceBeforeDiscount: number;
+  quantity: number;
+  name: string;
+  description: string;
+  shortDescription: string;
+  image: string;
+  idShop: number;
+  length: number;
+  width: number;
+  height: number;
+  weight: number;
+  category: Category;
+  reviews: Reviews[]; // Assuming reviews are any type, you can replace with appropriate type if known
+  createdAt: string; // Assuming ISO string format
+  updatedAt: string | null;
+  rating: number;
+  sold: number;
+  view: number;
+  orderNumber: number;
+  sizeQuantities: SizeQuantity[];
+  public: boolean;
 }
 
+interface Category {
+  id: number;
+  name: string;
+}
+
+interface Reviews{
+  id:number;
+  idCustomer:number;
+  rating:number;
+  comment: string;
+  createdAt: string;
+}
+
+interface SizeQuantity {
+  id: number;
+  size: string;
+  color: string;
+  quantity: number;
+}
 
 
 
