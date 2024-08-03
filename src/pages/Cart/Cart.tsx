@@ -15,12 +15,14 @@ import { AppContext } from 'src/contexts/app.context'
 import noproduct from 'src/assets/images/no-product.png'
 import { Purchase } from 'src/types/purchase.type'
 import DetailSizeColorQuantity from './DetailSizeColorQuantity'
-
+import { useNavigate } from 'react-router-dom';
 export default function Cart() {
+  const navigate = useNavigate();
   const { extendedPurchases, setExtendedPurchases } = useContext(AppContext)
-
   const id = localStorage.getItem('id');
   const userId = id !== null ? parseInt(id) : 0;
+
+  
   const { data: purchasesInCartData, refetch } = useQuery({
     queryKey: ['purchases', userId.toString()],
     queryFn: () => purchaseApi.getPurchases(userId.toString())
@@ -172,13 +174,20 @@ export default function Cart() {
 
   const handleBuyPurchases = () => {
     if (checkedPurchases.length > 0) {
-      const body = checkedPurchases.map((purchase) => ({
-        product_id: purchase.product.id.toString(),
-        buy_count: purchase.buy_count
-      }))
+      // const body = checkedPurchases.map((purchase) => ({
+      //   product_id: purchase.product.id.toString(),
+      //   buy_count: purchase.buy_count
+      // }))
+      // toast.success('Đặt hàng thành công', { autoClose: 1000 })
+      const firstPhoneOwner = checkedPurchases[0]?.product?.idShop;
+      const allSamePhoneOwner = checkedPurchases.every(order => order.product.idShop === firstPhoneOwner);
+      if (allSamePhoneOwner) {
 
-      toast.success('Đặt hàng thành công', { autoClose: 1000 })
+        navigate('/payment', { state: { checkedPurchases } });
 
+      }else{
+        toast.warning('Không thể đặt hàng với nhiều shop khác nhau', { autoClose: 2000 })
+      }
     }
   }
 

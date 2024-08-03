@@ -20,8 +20,9 @@ const ProductDetail = lazy(() => import('./pages/ProductDetail'))
 const Cart = lazy(() => import('./pages/Cart'))
 const ChangePassword = lazy(() => import('./pages/User/pages/ChangePassword'))
 const HistoryPurchase = lazy(() => import('./pages/User/pages/HistoryPurchase'))
+const DetailOrderU = lazy(() => import('./pages/User/pages/DetailOrderU'))
 const NotFound = lazy(() => import('./pages/NotFound'))
-
+const Payment = lazy(() => import('./pages/Payment'))
 const Order = lazy(() => import('./pages/SellerPage/Order'))
 const Product = lazy(() => import('./pages/SellerPage/Product'))
 const Promotion = lazy(() => import('./pages/SellerPage/Promotion'))
@@ -178,6 +179,14 @@ export default function useRouteElements() {
           )
         },
         {
+          path: path.payment,
+          element: (
+            <MainLayout>
+              <Payment />
+            </MainLayout>
+          )
+        },
+        {
           path: path.user,
           element: (
             <MainLayout>
@@ -196,6 +205,10 @@ export default function useRouteElements() {
             {
               path: path.historyPurchase,
               element: <HistoryPurchase />
+            },
+            {
+              path: path.historyPurchaseDetail,
+              element: <DetailOrderU />
             }
           ]
         }

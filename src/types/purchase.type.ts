@@ -1,6 +1,6 @@
 import { Product } from './product.type'
 
-export type PurchaseStatus = -1 | 1 | 2 | 3 | 4 | 5
+export type PurchaseStatus = '-1' | 'waitForConfirmation' | 'waitForGetting' | 'inProgress' | 'delivered' | 'cancelled' | 'refund' | 'indelevered'
 
 export type PurchaseListStatus = PurchaseStatus
 

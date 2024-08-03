@@ -1,3 +1,18 @@
+export interface Promotion {
+  id: number;
+  name: string;
+  startDate: string; // ISO 8601 date string
+  endDate: string;   // ISO 8601 date string
+  code: string;
+  status: 'active' | 'inactive'; // Assuming status can be 'active' or 'inactive'
+  description: string;
+  discountAmount: number; // Assuming it's in the same currency unit as the rest of the prices
+  idShop: number; // ID of the shop
+  products: Product[]; // Assuming products is an array of Product objects
+}
+
+
+
 export interface Product {
   id: number;
   images: string[];

@@ -1,3 +1,37 @@
+export interface PromotionRequest {
+  id: number | null; // Assuming id can be null or a number
+  name: string;
+  startDate: string; // You can also use Date if you parse it to a Date object later
+  endDate: string; // Same as above
+  code: string;
+  status: 'active' | 'inactive'; // Assuming status can only be 'active' or 'inactive'
+  description: string;
+  discountAmount: number;
+  idShop: number;
+  idProducts: string[]; // Array of product IDs
+}
+
+export interface OrderItemRequest {
+  id: number |null;
+  productId: number;
+  idSizeQuantity?: number; // cho phép null nếu là các sản phẩm k có size
+  promotionId?: number; // cho phép null nếu là các sản phẩm k có promotion
+  quantity: number; // số lượng sản phẩm
+  note: string;
+}
+
+export interface OrderRequest {
+  id: number |null;
+  customerId: number;
+  shopId: number;
+  totalMoney: number;
+  status: string; // Trạng thái hiện tại của đơn hàng (ví dụ: pending, paid, shipped, delivered, cancelled)
+  orderItems: OrderItemRequest[];
+  orderDate:string | '';
+}
+
+
+
 interface SizeQuantityRequest {
   id: number;
   size: string;

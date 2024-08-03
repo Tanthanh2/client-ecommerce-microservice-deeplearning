@@ -1,9 +1,10 @@
-import { ProductRequest } from 'src/constants/contant'
-import { Product, ProductList, ProductListConfig } from 'src/types/product.type'
+import { ProductRequest, PromotionRequest } from 'src/constants/contant'
+import { Product, ProductList, ProductListConfig, Promotion } from 'src/types/product.type'
 import { SuccessResponse } from 'src/types/utils.type'
 import http from 'src/utils/http'
 const URL = '/api/v1/products'
 const productApi = {
+  
 
   
   getProducts(params: ProductListConfig) {
@@ -44,7 +45,30 @@ const productApi = {
 
   deleteSizeQuantity(id: any) {
     return http.delete<void>(`/api/v1/products/seller/${id}/sizequantity`)
-  }
+  },
+
+
+
+
+
+  addPromotion(data:PromotionRequest){
+    return http.post<string>("/api/v1/products/promotions/", data)
+  },
+
+  async getPromotionsByIdShop(idShop: string) {
+    const response = await http.get<Promotion[]>(`/api/v1/products/promotions/shop/${idShop}`);
+    return response.data
+  },
+  getPromotion(id: string) {
+    return http.get<Promotion>(`/api/v1/products/promotions/${id}`)
+  },
+  updatePromotion(id: string, data: PromotionRequest) {
+    return http.put<Promotion>(`/api/v1/products/promotions/${id}`, data)
+  },
+  async getPromotionByProductActive(idProduct: string) {
+    const response = await http.get<Promotion[]>(`/api/v1/products/promotions/product/${idProduct}/active`);
+    return response.data; // Trả về dữ liệu sản phẩm từ phản hồi
+  },
   
 }
 export default productApi

@@ -5,11 +5,13 @@ const path = {
   profile: '/user/profile',
   changePassword: '/user/password',
   historyPurchase: '/user/purchase',
+  historyPurchaseDetail: '/user/purchase/detail',
   login: '/login',
   register: '/register',
   logout: '/logout',
   productDetail: ':nameId',
   cart: '/cart',
+  payment:'/payment',
 
   // seller page
   order: '/seller/order',
