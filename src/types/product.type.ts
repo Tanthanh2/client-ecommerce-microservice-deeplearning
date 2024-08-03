@@ -14,9 +14,9 @@ export interface Product {
   height: number;
   weight: number;
   category: Category;
-  reviews: Reviews[]; // Assuming reviews are any type, you can replace with appropriate type if known
   createdAt: string; // Assuming ISO string format
   updatedAt: string | null;
+  reviews: Reviews[]; // Assuming reviews are any type, you can replace with appropriate type if known
   rating: number;
   sold: number;
   view: number;
@@ -38,7 +38,7 @@ interface Reviews{
   createdAt: string;
 }
 
-interface SizeQuantity {
+export interface SizeQuantity {
   id: number;
   size: string;
   color: string;

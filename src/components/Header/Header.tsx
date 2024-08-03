@@ -80,9 +80,12 @@ export default function Header() {
   // not unmount - mount again
   // except of course case logout then jump to RegisterLayout comback in case
   // should queries not have inactive => not call again > unecessary set stale: infinity
+  const id = localStorage.getItem('id');
+  const userId = id !== null ? parseInt(id) : 0;
+
   const { data: purchasesInCartData } = useQuery({
-    queryKey: ['purchases', { status: purchasesStatus.inCart }],
-    queryFn: () => purchaseApi.getPurchases({ status: purchasesStatus.inCart }),
+    queryKey: ['purchases', userId.toString()],
+    queryFn: () => purchaseApi.getPurchases(userId.toString()),
     // explain : here, we don't want to call api when user is not authenticated
     enabled: isAuthenticated
   })
@@ -95,6 +98,8 @@ export default function Header() {
     localStorage.removeItem('accessToken')
     localStorage.removeItem('refreshToken')
     localStorage.removeItem('profile')
+    localStorage.removeItem('id')
+    localStorage.removeItem('shopId')
     setIsAuthenticated(false)
     setProfile(null)
     toast.success('Logout success')
@@ -118,8 +123,7 @@ export default function Header() {
   };
 
         // Example POST request
-        const id = localStorage.getItem('id');
-        const userId = id !== null ? parseInt(id) : 0;
+
   const checkShopExistsMutation = useMutation({
     mutationFn: () => userApi.checkexitsshop(userId),
     onSuccess: (data) => {

@@ -11,7 +11,7 @@ export default function Product({ product }: Props) {
     <Link
       to={`${path.home}${generateNameId({
         name: product.name,
-        id: product._id
+        id: product.id.toString()
       })}`}
     >
       <div
@@ -30,7 +30,7 @@ export default function Product({ product }: Props) {
           <div className='mt-2 flex justify-start gap-2'>
             <div className='max-w-[50%] truncate text-gray-500 line-through'>
               <span className='text-xs'>₫</span>
-              <span className='text-sm'>{product.price_before_discount}</span>
+              <span className='text-sm'>{product.priceBeforeDiscount}</span>
             </div>
             <div className='max-w-[50%] truncate text-orange'>
               <span className='text-xs'>₫</span>

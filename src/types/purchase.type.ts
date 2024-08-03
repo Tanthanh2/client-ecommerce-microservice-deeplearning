@@ -11,9 +11,11 @@ export interface Purchase {
   price_before_discount: number
   status: PurchaseStatus
   user: string
-  product: Product
   createdAt: string
   updatedAt: string
+  id_size_quantity_color: number
+  
+  product: Product
 }
 
 export interface ExtendedPurchase extends Purchase {

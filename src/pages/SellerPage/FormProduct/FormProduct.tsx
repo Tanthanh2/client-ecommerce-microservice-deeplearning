@@ -251,11 +251,13 @@ const { data: productDetailData } = useQuery({
       <FormShipping formData={formDataShipping} onFormDataChange={handleFormDataChange} isUpdate={isUpdate} idProduct =  {id ? id : '0'}/>
       {/* END THÔNG TIN VẬN CHUYỂN */}
 
-      <div className="flex justify-start ml-2">
-        <button type="submit" className="bg-red-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
-          Lưu sản phẩm
-        </button>
-      </div>
+      {id === undefined && (
+          <div className="flex justify-start ml-2">
+            <button type="submit" className="bg-red-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+              Lưu sản phẩm
+            </button>
+          </div>
+        )}
     </div>
   </form>
   )

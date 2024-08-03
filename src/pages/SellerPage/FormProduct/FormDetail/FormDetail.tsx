@@ -1,6 +1,9 @@
 import React , {useEffect}from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { ProductRequest } from 'src/constants/contant';
+import productApi from 'src/apis/product.api';
+import { toast } from 'react-toastify';
+
 
 interface FormBasicProps {
   formData: FormData;
@@ -40,6 +43,18 @@ const FormDetail: React.FC<FormBasicProps> = ({ formData, onFormDataChange, isUp
 
 const handleUpdate = async (event: React.MouseEvent<HTMLButtonElement>) => {
   event.preventDefault(); // Ngăn chặn hành vi submit của form
+  const concatenatedData = Object.values(formValues).join('_');
+  const formData: FormData = {
+    shortDescription: concatenatedData,
+  };
+  console.log(formData);
+  try {
+    await productApi.updateProductDetail(idProduct, formData);
+    toast.success('Product updated successfully!');
+  } catch (error) {
+    console.error('Error updating product:', error);
+    toast.error('Error updating product.');
+  }
 
 
 };

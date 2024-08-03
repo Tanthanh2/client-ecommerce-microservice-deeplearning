@@ -1,5 +1,7 @@
 import React ,{useEffect}from 'react';
 import { useForm, useFieldArray, SubmitHandler } from 'react-hook-form';
+import { toast } from 'react-toastify';
+import productApi from 'src/apis/product.api';
 import { ProductRequest } from 'src/constants/contant';
 
 interface FormBasicProps {
@@ -71,8 +73,37 @@ useEffect(() => {
 
 const handleUpdate = async (event: React.MouseEvent<HTMLButtonElement>) => {
   event.preventDefault(); // Ngăn chặn hành vi submit của form
+  const data = watch(); // Lấy dữ liệu từ form
+  if (hasSize) {
+    // Tính tổng số lượng từ sizeQuantities
+    data.quantity = sizeQuantities.reduce((total, item) => total + Number(item.quantity), 0);
+  } else {
+    data.sizeQuantities = []; // Đặt thành một mảng rỗng nếu không có size
+  }
+  console.log(data);
+  try {
+    await productApi.updateProductSell(idProduct, data);
+    toast.success('Product updated successfully!');
+  } catch (error) {
+    console.error('Error updating product:', error);
+    toast.error('Error updating product.');
+  }
+
+};
 
 
+
+const handleRemove = async (index: number, id: number | null) => {
+  console.log('remove sizeQuantity with id:', id);
+  if (id) {
+    try {
+      await productApi.deleteSizeQuantity(id); // Call API to delete SizeQuantity by ID
+      toast.success('SizeQuantity removed successfully!');
+    } catch (error) {
+      toast.error('Error removing SizeQuantity.');
+    }
+  }
+  remove(index); // Remove from the form array
 };
 
   return (
@@ -146,7 +177,7 @@ const handleUpdate = async (event: React.MouseEvent<HTMLButtonElement>) => {
                   </div>
 
                   <div className="md:col-span-3 flex justify-end">
-                    <button type="button" onClick={() => remove(index)} className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
+                    <button type="button"onClick={() => handleRemove(index,sizeQuantities?.[index]?.id)} className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
                       Remove
                     </button>
                   </div>

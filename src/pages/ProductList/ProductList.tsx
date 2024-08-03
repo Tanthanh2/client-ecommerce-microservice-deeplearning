@@ -31,7 +31,7 @@ export default function ProductList() {
     }
   })
 
-  console.log(productsData?.data.data)
+  console.log(productsData?.data.data.products)
   return (
     <div className='bg-gray-200 py-6'>
       <Head title={'Trang chủ | Shopee Clone'} />
@@ -46,7 +46,7 @@ export default function ProductList() {
               <SortProductList queryConfig={queryConfig} pageSize={productsData.data.data.pagination.page_size} />
               <div className='mt-6 grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5'>
                 {productsData.data.data.products.map((product: ProductType) => (
-                  <div className='col-span-1' key={product._id}>
+                  <div className='col-span-1' key={product.id}>
                     <Product product={product} />
                   </div>
                 ))}

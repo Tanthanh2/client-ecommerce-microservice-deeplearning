@@ -6,7 +6,7 @@ import Button from 'src/components/Button'
 import QuantityController from 'src/components/QuantityController'
 import path from 'src/constants/path'
 import { purchasesStatus } from 'src/constants/purchase'
-
+import {SizeQuantity} from 'src/types/product.type'
 import { formatCurrency, generateNameId } from 'src/utils/utils'
 import produce from 'immer'
 import keyBy from 'lodash/keyBy'
@@ -14,29 +14,49 @@ import { toast } from 'react-toastify'
 import { AppContext } from 'src/contexts/app.context'
 import noproduct from 'src/assets/images/no-product.png'
 import { Purchase } from 'src/types/purchase.type'
+import DetailSizeColorQuantity from './DetailSizeColorQuantity'
 
 export default function Cart() {
   const { extendedPurchases, setExtendedPurchases } = useContext(AppContext)
+
+  const id = localStorage.getItem('id');
+  const userId = id !== null ? parseInt(id) : 0;
   const { data: purchasesInCartData, refetch } = useQuery({
-    queryKey: ['purchases', { status: purchasesStatus.inCart }],
-    queryFn: () => purchaseApi.getPurchases({ status: purchasesStatus.inCart })
+    queryKey: ['purchases', userId.toString()],
+    queryFn: () => purchaseApi.getPurchases(userId.toString())
   })
-  const updatePurchaseMutation = useMutation({
-    mutationFn: purchaseApi.updatePurchase,
-    onSuccess: () => {
-      refetch()
+
+
+  function getSizeQuantityFromPurchase(purchase: Purchase): SizeQuantity | undefined {
+    const { product, id_size_quantity_color } = purchase;
+    // Find the SizeQuantity that matches the given id_size_quantity_color
+    return product.sizeQuantities.find(sizeQuantity => sizeQuantity.id === id_size_quantity_color);
+  }
+
+  type AddToCartPayload = {
+    idProduct: string;
+    idSizeQuantity: string;
+    quantity: number;
+  };
+  
+  // Define the type for the mutation function
+  const addToCartMutation = useMutation<any, unknown, AddToCartPayload>(
+    (data) => purchaseApi.addToCart(userId.toString(), data),
+    {
+      onSuccess: (data) => {
+        toast.success(data.data.message, { autoClose: 1000 });
+        refetch()
+      },
+      onError: (error) => {
+        toast.error('Failed to add to cart. Please try again.', { autoClose: 1000 });
+      }
     }
-  })
-  const buyProductsMutation = useMutation({
-    mutationFn: purchaseApi.buyProducts,
-    onSuccess: (data) => {
-      refetch()
-      toast.success(data.data.message, {
-        position: 'top-center',
-        autoClose: 1000
-      })
-    }
-  })
+  );
+
+
+
+
+
   const deletePurchasesMutation = useMutation({
     mutationFn: purchaseApi.deletePurchase,
     onSuccess: () => {
@@ -59,7 +79,7 @@ export default function Cart() {
   const totalCheckedPurchaseSavingPrice = useMemo(
     () =>
       checkedPurchases.reduce((result, current) => {
-        return result + (current.product.price_before_discount - current.product.price) * current.buy_count
+        return result + (current.product.priceBeforeDiscount - current.product.price) * current.buy_count
       }, 0),
     [checkedPurchases]
   )
@@ -111,36 +131,54 @@ export default function Cart() {
     )
   }
 
-  const handleQuantity = (purchaseIndex: number, value: number, enable: boolean) => {
+  const handleQuantity = (vaule:number,purchaseIndex: number, value: number, enable: boolean) => {
+
     if (enable) {
       const purchase = extendedPurchases[purchaseIndex]
+      const sizeQuantity = getSizeQuantityFromPurchase(purchase)
+      if (sizeQuantity && sizeQuantity.quantity < (vaule+ value)) {
+        toast.error('Số lượng sản phẩm không đủ trong kho', { autoClose: 2000 })
+        return
+      }
       setExtendedPurchases(
         produce((draft) => {
           draft[purchaseIndex].disabled = true
         })
       )
-      updatePurchaseMutation.mutate({ product_id: purchase.product._id, buy_count: value })
+      console.log({ quantity: value, idProduct: purchase.product.id.toString() as string , idSizeQuantity: purchase.id_size_quantity_color.toString() as string})
+      addToCartMutation.mutate(
+        { quantity: value, idProduct: purchase.product.id.toString() as string , idSizeQuantity: purchase.id_size_quantity_color.toString() as string},
+        {
+          onSuccess: (data) => {
+            toast.success(data.data.message, { autoClose: 1000 })
+          }
+        }
+      )
     }
   }
 
   const handleDelete = (purchaseIndex: number) => () => {
-    const purchaseId = extendedPurchases[purchaseIndex]._id
 
+    const purchaseId = extendedPurchases[purchaseIndex]._id
+    console.log(purchaseId)
     deletePurchasesMutation.mutate([purchaseId])
   }
 
   const handleDeleteManyPurchases = () => {
     const purchasesIds = checkedPurchases.map((purchase) => purchase._id)
+    console.log(purchasesIds)
     deletePurchasesMutation.mutate(purchasesIds)
   }
 
   const handleBuyPurchases = () => {
     if (checkedPurchases.length > 0) {
       const body = checkedPurchases.map((purchase) => ({
-        product_id: purchase.product._id,
+        product_id: purchase.product.id.toString(),
         buy_count: purchase.buy_count
       }))
-      buyProductsMutation.mutate(body)
+
+      toast.success('Đặt hàng thành công', { autoClose: 1000 })
+
     }
   }
 
@@ -197,7 +235,7 @@ export default function Cart() {
                                   className='h-20 w-20 flex-shrink-0 '
                                   to={`${path.home}${generateNameId({
                                     name: purchase.product.name,
-                                    id: purchase.product._id
+                                    id: purchase.product.id.toString()
                                   })}`}
                                 >
                                   <img alt={purchase.product.name} src={purchase.product.image} />
@@ -206,12 +244,14 @@ export default function Cart() {
                                   <Link
                                     to={`${path.home}${generateNameId({
                                       name: purchase.product.name,
-                                      id: purchase.product._id
+                                      id: purchase.product.id.toString()
                                     })}`}
                                     className='text-left line-clamp-2'
                                   >
                                     {purchase.product.name}
                                   </Link>
+
+                                  <DetailSizeColorQuantity  purchase={purchase} />
                                 </div>
                               </div>
                             </div>
@@ -222,7 +262,7 @@ export default function Cart() {
                             <div className='col-span-2'>
                               <div className='flex items-center justify-center'>
                                 <span className='text-gray-300 line-through'>
-                                  ₫{formatCurrency(purchase.product.price_before_discount)}
+                                  ₫{formatCurrency(purchase.product.priceBeforeDiscount)}
                                 </span>
                                 <span className='ml-3'>₫{formatCurrency(purchase.product.price)}</span>
                               </div>
@@ -233,15 +273,15 @@ export default function Cart() {
                                 value={purchase.buy_count}
                                 classNameWrapper='flex items-center'
                                 onIncrease={(value) => {
-                                  console.log(value, purchase.product.quantity)
-                                  handleQuantity(index, value, value <= purchase.product.quantity)
+                                  handleQuantity(value,index, 1, value <= purchase.product.quantity)
                                 }}
-                                onDecrease={(value) => handleQuantity(index, value, value >= 1)}
+                                onDecrease={(value) => handleQuantity(value,index, -1, value >= 1)}
                                 onType={handleTypeQuantity(index)}
                                 onFocusOut={(value) =>
                                   handleQuantity(
-                                    index,
                                     value,
+                                    index,
+                                    1,
                                     value >= 1 &&
                                       value <= purchase.product.quantity &&
                                       value !== (purchasesInCart as Purchase[])[index].buy_count
@@ -303,7 +343,6 @@ export default function Cart() {
                 <Button
                   className='mt-5 flex h-10 w-52 items-center justify-center bg-red-500 text-sm uppercase text-white hover:bg-red-600 sm:ml-4 sm:mt-0'
                   onClick={handleBuyPurchases}
-                  disabled={buyProductsMutation.isLoading}
                 >
                   Mua hàng
                 </Button>

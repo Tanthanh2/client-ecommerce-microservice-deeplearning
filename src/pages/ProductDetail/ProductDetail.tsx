@@ -28,12 +28,14 @@ export default function ProductDetail() {
   const [currentIndexImages, setCurrentIndexImages] = useState([0, 5])
   const [activeImage, setActiveImage] = useState('')
   const product = productDetailData?.data.data
+  const shortDescription = product?.shortDescription.split('_') || [];
+
   const imageRef = useRef<HTMLImageElement>(null)
   const currentImages = useMemo(
     () => (product ? product.images.slice(...currentIndexImages) : []),
     [product, currentIndexImages]
   )
-  const queryConfig: ProductListConfig = { limit: '20', page: '1', category: product?.category._id }
+  const queryConfig: ProductListConfig = { limit: '20', page: '1', category: product?.category.id.toString() }
 
   const { data: productsData } = useQuery({
     queryKey: ['products', queryConfig],
@@ -43,7 +45,31 @@ export default function ProductDetail() {
     staleTime: 3 * 60 * 1000,
     enabled: Boolean(product)
   })
-  const addToCartMutation = useMutation(purchaseApi.addToCart)
+  const idu = localStorage.getItem('id');
+  const userId = idu !== null ? idu : "0";
+
+// Define the type for the addToCart mutation payload
+type AddToCartPayload = {
+  idProduct: string;
+  idSizeQuantity: string;
+  quantity: number;
+};
+
+// Define the type for the mutation function
+const addToCartMutation = useMutation<any, unknown, AddToCartPayload>(
+  (data) => purchaseApi.addToCart(userId, data),
+  {
+    onSuccess: (data) => {
+      toast.success(data.data.message, { autoClose: 1000 });
+      queryClient.invalidateQueries({ queryKey: ['purchases', { status: purchasesStatus.inCart }] });
+    },
+    onError: (error) => {
+      toast.error('Failed to add to cart. Please try again.', { autoClose: 1000 });
+    }
+  }
+);
+
+  
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -96,9 +122,28 @@ export default function ProductDetail() {
     setBuyCount(value)
   }
 
+
+  const [selectedSizeQuantity, setSelectedSizeQuantity] = useState<number | null>(null)
+  const handleSizeQuantityChange = (sizeQuantity: number) => {
+    setSelectedSizeQuantity(sizeQuantity)
+  }
+
+
+
+
+
   const addToCart = () => {
+
+    if(product?.sizeQuantities.length != 0){
+      if(selectedSizeQuantity === null){
+        toast.warning('Please select a size and quantity', { autoClose: 1000 })
+        return
+      }
+    }
+
+
     addToCartMutation.mutate(
-      { buy_count: buyCount, product_id: product?._id as string },
+      { quantity: buyCount, idProduct: product?.id.toString() as string , idSizeQuantity: selectedSizeQuantity?.toString() as string},
       {
         onSuccess: (data) => {
           toast.success(data.data.message, { autoClose: 1000 })
@@ -109,7 +154,15 @@ export default function ProductDetail() {
   }
 
   const buyNow = async () => {
-    const res = await addToCartMutation.mutateAsync({ buy_count: buyCount, product_id: product?._id as string })
+    if(product?.sizeQuantities.length != 0){
+      if(selectedSizeQuantity === null){
+        toast.warning('Please select a size and quantity', { autoClose: 1000 })
+        return
+      }
+    }
+
+
+    const res = await addToCartMutation.mutateAsync({ quantity: buyCount, idProduct: product?.id.toString() as string , idSizeQuantity: selectedSizeQuantity?.toString() as string })
     const purchase = res.data.data
     navigate(path.cart, {
       state: {
@@ -119,6 +172,11 @@ export default function ProductDetail() {
   }
 
   if (!product) return null
+
+
+
+
+
   return (
     <div className='bg-gray-200 py-6'>
       {/* <Helmet>
@@ -213,12 +271,35 @@ export default function ProductDetail() {
                 </div>
               </div>
               <div className='mt-8 flex items-center bg-gray-50 px-5 py-4'>
-                <div className='text-gray-500 line-through'>₫{formatCurrency(product.price_before_discount)}</div>
+                <div className='text-gray-500 line-through'>₫{formatCurrency(product.priceBeforeDiscount)}</div>
                 <div className='ml-3 text-3xl font-medium text-orange'>₫{formatCurrency(product.price)}</div>
                 <div className='ml-4 rounded-sm bg-orange px-1 py-[2px] text-xs font-semibold uppercase text-white'>
-                  {rateSale(product.price_before_discount, product.price)} giảm
+                  {rateSale(product.priceBeforeDiscount, product.price)} giảm
                 </div>
               </div>
+
+
+
+
+              {product.sizeQuantities && product.sizeQuantities.length > 0 ? (
+                <div className='mt-8'>
+                  {product.sizeQuantities.map((sizeQuantity) => (
+                    <div key={sizeQuantity.id} className='flex items-center'>
+                       <input
+                        type='radio'
+                        name='sizeQuantity'
+                        value={sizeQuantity.id}
+                        checked={selectedSizeQuantity === sizeQuantity.id}
+                        onChange={() => handleSizeQuantityChange(sizeQuantity.id)}
+                      />
+                      <div className='ml-6 text-sm text-gray-500'>Màu: {sizeQuantity.color}</div>
+                      <div className='ml-6 text-sm text-gray-500'>Size: {sizeQuantity.size}</div>
+                      <div className='ml-6 text-sm text-gray-500'>{sizeQuantity.quantity} sản phẩm có sẵn</div>
+                    </div>
+                  ))}
+                </div>
+              ) : null}
+
               <div className='mt-8 flex items-center'>
                 <div className='capitalize text-gray-500'>Số lượng</div>
                 <QuantityController
@@ -230,6 +311,13 @@ export default function ProductDetail() {
                 />
                 <div className='ml-6 text-sm text-gray-500'>{product.quantity} sản phẩm có sẵn</div>
               </div>
+
+
+
+
+
+
+
               <div className='mt-8 flex items-center'>
                 <button
                   onClick={addToCart}
@@ -267,6 +355,40 @@ export default function ProductDetail() {
                   Mua ngay
                 </button>
               </div>
+              <div>
+
+
+
+              <div className="bg-gradient-to-b from-gray-100 to-gray-300 py-6">
+  <div className="container">
+    <div className="bg-white p-6 rounded-lg shadow-lg">
+      <div className="rounded-t-lg bg-orange-100 p-4 text-lg font-semibold text-orange-700 capitalize">Thông tin sản phẩm</div>
+      <div className="mx-4 mt-6 mb-4 text-sm leading-loose">
+        <div className="grid grid-cols-2 gap-6">
+          {[
+            { label: 'Thương hiệu', value: shortDescription[0] || 'N/A' },
+            { label: 'Nhà sản xuất', value: shortDescription[1] || 'N/A' },
+            { label: 'Chất liệu', value: shortDescription[2] || 'N/A' },
+            { label: 'Thành phần', value: shortDescription[3] || 'N/A' },
+            { label: 'Địa chỉ sản xuất', value: shortDescription[4] || 'N/A' },
+            { label: 'Ngày sản xuất', value: shortDescription[5] || 'N/A' },
+            { label: 'Ngày hết hạn', value: shortDescription[6] || 'N/A' },
+            { label: 'Thông tin bảo hành', value: shortDescription[7] || 'N/A' },
+          ].map((item, index) => (
+            <div key={index} className="bg-gray-50 p-3 rounded-lg shadow-sm transition-transform transform hover:scale-105">
+              <strong className="text-gray-800">{item.label}:</strong> 
+              <span className="text-gray-600"> {item.value}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+                
+              </div>
             </div>
           </div>
         </div>
@@ -292,7 +414,7 @@ export default function ProductDetail() {
           {productsData && (
             <div className='mt-6 grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6'>
               {productsData.data.data.products.map((product) => (
-                <div className='col-span-1' key={product._id}>
+                <div className='col-span-1' key={product.id}>
                   <Product product={product} />
                 </div>
               ))}

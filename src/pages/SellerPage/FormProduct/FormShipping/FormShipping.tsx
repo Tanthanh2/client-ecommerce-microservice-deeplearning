@@ -1,5 +1,7 @@
 import React, {useEffect} from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
+import { toast } from 'react-toastify';
+import productApi from 'src/apis/product.api';
 import { ProductRequest } from 'src/constants/contant';
 
 interface FormBasicProps {
@@ -47,7 +49,20 @@ const FormShipping: React.FC<FormBasicProps> = ({ formData, onFormDataChange, is
 
   const handleUpdate = async (event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault(); // Ngăn chặn hành vi submit của form
-
+    const formData = {
+      weight: formValues.weight,
+      height: formValues.height,
+      length: formValues.length,
+      width: formValues.width,
+    };
+    console.log(formData);
+    try {
+      await productApi.updateProductShip(idProduct, formData);
+      toast.success('Product updated successfully!');
+    } catch (error) {
+      console.error('Error updating product:', error);
+      toast.error('Error updating product.');
+    }
 
   };
 

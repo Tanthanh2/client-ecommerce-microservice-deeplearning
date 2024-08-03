@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import categoryApi from 'src/apis/categoriest';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { TailSpin } from 'react-loader-spinner';
 import { storage } from 'src/configs/firebase';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { ProductRequest } from 'src/constants/contant';
+import productApi from 'src/apis/product.api';
+import { toast } from 'react-toastify';
 
 interface FormBasicProps {
   formData: FormInputs;
@@ -111,11 +113,36 @@ const ProductForm: React.FC<FormBasicProps> = ({ formData, onFormDataChange , is
 
   if (isLoading) return <p>Loading categories...</p>;
   if (error) return <p>Error loading categories</p>;
+
+
+
+
   const handleUpdate = async (event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault(); // Ngăn chặn hành vi submit của form
     console.log(idProduct)
+    let uploadedImages = null;
+    if(files === null){
+      uploadedImages = imagePreviews
+    }
+    else{
+      uploadedImages = await handleUpload();
+    }
 
-
+    const data1: FormInputs = {
+      images: uploadedImages,
+      name: formValues.name,
+      description: formValues.description,
+      categoryId: formValues.categoryId,
+      image: uploadedImages[0], // Use the first uploaded image as the main image
+    };
+    console.log(data1)
+    try {
+      await productApi.updateProductBasic(idProduct, data1);
+      toast.success('Product updated successfully!');
+    } catch (error) {
+      console.error('Error updating product:', error);
+      toast.error('Error updating product.');
+    }
 
   };
 

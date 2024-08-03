@@ -46,6 +46,12 @@ export default function  Navbar() {
             />
           }
         >
+                  <ListItem onClick={() => navigate('/')}>
+          <ListItemPrefix>
+            <InboxIcon className="h-5 w-5" />
+          </ListItemPrefix>
+          Trang chủ
+        </ListItem>
           <ListItem className="p-0" selected={open === 1} >
             <AccordionHeader onClick={() => handleOpen(1)} className="border-b-0 p-3">
               <ListItemPrefix>
