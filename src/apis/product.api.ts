@@ -14,6 +14,10 @@ const productApi = {
   getProductDetail(id: string) {
     return http.get<SuccessResponse<Product>>(`${URL}/${id}`)
   },
+  
+  plusView(id: string) {
+    return http.get<String>(`${URL}/plus-view/${id}`)
+  },
 
   addProduct(data:ProductRequest){
     return http.post<string>("/api/v1/products/seller", data)

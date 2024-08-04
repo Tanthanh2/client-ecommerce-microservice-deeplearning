@@ -78,9 +78,17 @@ export default function HistoryPurchase() {
         <p className='text-md text-blue-600'>{`Trạng thái: ${purchase.status}`}</p>
         <p className='text-sm text-gray-500'>{`Ngày đặt: ${new Date(purchase.orderDate).toLocaleDateString()}`}</p>
       </div>
-      <button onClick={() => onViewDetails(purchase)} className='bg-blue-600 text-white rounded-full px-6 py-2 text-sm font-semibold transition-transform transform hover:scale-105'>
+<div className='flex flex-col space-y-4'>
+<button onClick={() => onViewDetails(purchase)} className='bg-blue-400 text-white rounded-full px-6 py-2 text-sm font-semibold transition-transform transform hover:scale-105'>
         Xem chi tiết
       </button>
+      <button  className='bg-green-400 text-white rounded-full px-6 py-2 text-sm font-semibold transition-transform transform hover:scale-105'>
+        Xem thông tin thanh toán
+      </button>
+      <button  className='bg-yellow-500 text-white rounded-full px-6 py-2 text-sm font-semibold transition-transform transform hover:scale-105'>
+        xem thông tin vận chuyển
+      </button>
+</div>
     </div>
 
     <div className='flex justify-between items-center mt-4'>

@@ -7,6 +7,19 @@ import http from 'src/utils/http'
 
 const URL = '/api/v1/carts'
 
+interface MomoPaymentResponse {
+  partnerCode: string;
+  orderId: string;
+  requestId: string;
+  amount: number;
+  responseTime: number;
+  message: string;
+  resultCode: number;
+  payUrl: string;
+  shortLink: string;
+}
+
+
 const purchaseApi = {
   addToCart(iduser:string, body: { idProduct: string; quantity: number; idSizeQuantity:string|null }) {
     return http.post<SuccessResponse<Purchase>>(`/api/v1/carts/${iduser}`, body)
@@ -29,7 +42,7 @@ const purchaseApi = {
 
 
   addOrder(data: OrderRequest) {
-    return http.post<string>(`/api/v1/purchases/orders/`, data)
+    return http.post<string>(`/api/v1/purchases/orders/`, data).then((res) => res.data)
   },
   getOrder(id:string, status:string){
     return http.get<OrderRequest[]>(`/api/v1/purchases/orders/customer/${id}?status=${status}`)
@@ -44,6 +57,13 @@ const purchaseApi = {
       params: { status },
     });
   },
+
+  
+
+  //
+  paymentMomo({ id, totalMoney }: { id: string; totalMoney: number }) {
+    return http.post<MomoPaymentResponse>(`/api/v1/notifications/payment/`, { id, totalMoney }).then(response => response.data); // Trả về dữ liệu từ phản hồi;
+  }
 
 }
 

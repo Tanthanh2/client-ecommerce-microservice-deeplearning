@@ -25,6 +25,20 @@ export default function ProductDetail() {
     queryKey: ['product', id],
     queryFn: () => productApi.getProductDetail(id as string)
   })
+  useEffect (() => {
+    mutation.mutate(id);
+
+  }, [id])
+  const mutation = useMutation((id: string) => productApi.plusView(id), {
+    onSuccess: (data) => {
+      // Handle successful response
+      console.log('View count incremented successfully', data);
+    },
+    onError: (error) => {
+      // Handle error response
+      console.error('Error incrementing view count', error);
+    },
+  });
   const [currentIndexImages, setCurrentIndexImages] = useState([0, 5])
   const [activeImage, setActiveImage] = useState('')
   const product = productDetailData?.data.data

@@ -13,8 +13,23 @@ import productApi from 'src/apis/product.api';
 import { set } from 'lodash';
 import { number } from 'yup';
 import purchaseApi from 'src/apis/purchase.api';
+import { useNavigate } from 'react-router-dom';
+
+interface MomoPaymentResponse {
+  partnerCode: string;
+  orderId: string;
+  requestId: string;
+  amount: number;
+  responseTime: number;
+  message: string;
+  resultCode: number;
+  payUrl: string;
+  shortLink: string;
+}
 
 export default function Payment() {
+  const navigate = useNavigate();
+
   const location = useLocation();
   const { checkedPurchases } = location.state;
   // console.log(checkedPurchases);
@@ -72,9 +87,37 @@ export default function Payment() {
     };
   };
 
+
+  const mutationmomo = useMutation<MomoPaymentResponse, any, { id: string; totalMoney: number }>(
+    purchaseApi.paymentMomo, 
+    {
+      onSuccess: (data) => {
+        toast.success('Thanh toán MoMo bắt đầu');
+        console.log('Payment URL:', data.payUrl);
+        window.location.href = data.payUrl; 
+      },
+      onError: (error) => {
+        toast.error('Thanh toán MoMo không thành công');
+        console.error('Error:', error);
+      },
+    }
+  );
+
   const mutation = useMutation(purchaseApi.addOrder, {
-    onSuccess: () => {
-      toast.success("Đặt Hàng sản phẩm thành công");
+    onSuccess: (data:string) => {
+      toast.success("Đặt Hàng sản phẩm thành công");  
+      // thực hiện call api tiếp trong này có được không
+          // Submit the orderData to your backend or handle it as needed
+      if(paymentMethod == 'cod'){
+        toast.success("Thanh toán sản phẩm khi nhận hàng")
+        navigate('/user/purchase');
+      }else{
+
+        const paymentData = { id: data, totalMoney: totalmoney }; // Thay thế bằng dữ liệu thực tế
+        console.log('Payment Data:', paymentData);
+        mutationmomo.mutate(paymentData);
+
+      }
     },
     onError: (error) => {
       toast.error("Đặt Hàng sản phẩm không thành công");
@@ -82,10 +125,11 @@ export default function Payment() {
   });
 
   const handleOrderSubmit = () => {
+
     const orderData = createOrderData();
     console.log('Order Data:', orderData);
-    // Submit the orderData to your backend or handle it as needed
     mutation.mutate(orderData);
+
   };
 
 
