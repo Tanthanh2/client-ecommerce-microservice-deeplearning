@@ -4,12 +4,15 @@ import { createSearchParams, Link } from 'react-router-dom'
 import purchaseApi from 'src/apis/purchase.api'
 import path from 'src/constants/path'
 import { OrderItemRequest, OrderRequest } from 'src/constants/contant'
-
+import Modal from 'react-modal';
 import { purchasesStatus } from 'src/constants/purchase'
+import { useState } from 'react'
 import useQueryParams from 'src/hooks/useQueryParams'
 import { Purchase, PurchaseListStatus } from 'src/types/purchase.type'
 import { formatCurrency, generateNameId } from 'src/utils/utils'
 import { useNavigate } from 'react-router-dom';
+import { PaymentInfo } from 'src/constants/contant'
+import { toast } from 'react-toastify'
 
 
 const purchaseTabs = [
@@ -21,6 +24,40 @@ const purchaseTabs = [
   { status: purchasesStatus.refund, name: 'Hoàn tiền' },
   { status: purchasesStatus.indelevered, name: 'Giao không thành công' }
 ]
+
+
+// Định nghĩa interface cho props của ModalComponent
+interface ModalComponentProps {
+  isOpen: boolean;
+  onRequestClose: () => void;
+  paymentInfo: PaymentInfo | null;
+}
+
+// Định nghĩa modal tùy chỉnh
+const ModalComponent: React.FC<ModalComponentProps> = ({ isOpen, onRequestClose, paymentInfo }) => {
+  if (!isOpen) return null; // Không hiển thị modal nếu không mở
+
+  return (
+    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+      <div className="bg-white rounded-lg p-6 shadow-lg w-11/12 md:w-1/3">
+        <h2 className="text-xl font-bold mb-4">Thông tin thanh toán</h2>
+        {paymentInfo && (
+          <div>
+            <p><strong>ID:</strong> {paymentInfo.id}</p>
+            <p><strong>Ngày thanh toán:</strong> {new Date(paymentInfo.paymentDate).toLocaleString()}</p>
+            <p><strong>Trạng thái:</strong> {paymentInfo.status}</p>
+            <p><strong>Phương thức:</strong> {paymentInfo.method}</p>
+            <p><strong>Số tiền:</strong> {formatCurrency(paymentInfo.amount)}</p>
+          </div>
+        )}
+        <button onClick={onRequestClose} className="mt-4 bg-red-500 text-white rounded-full px-6 py-2 text-sm font-semibold">
+          Đóng
+        </button>
+      </div>
+    </div>
+  );
+};
+
 
 export default function HistoryPurchase() {
   const navigate = useNavigate();
@@ -64,6 +101,29 @@ export default function HistoryPurchase() {
     navigate('/user/purchase/detail', { state: { purchase } });
   };
 
+
+  const [modalIsOpen, setModalIsOpen] = useState(false);
+  const [paymentInfo, setPaymentInfo] = useState<PaymentInfo | null>(null);
+
+  const onViewPaymentInfo = async (purchaseId: number) => {
+    try {
+      const response = await purchaseApi.getPaymentByOrderId(purchaseId);
+      // Kiểm tra xem mã trạng thái có phải là 200 hay không
+      if (response.status === 200) {
+        setPaymentInfo(response.data);
+        setModalIsOpen(true);
+      } else {
+        // Hiển thị alert nếu không phải là 200
+        toast.warning('Không tìm thấy thông tin thanh toán.');
+      }
+    } catch (error) {
+      // Xử lý lỗi nếu có
+      toast.warning('đơn hàng này chưa được thanh toán')
+    }
+  };
+  
+  
+
   return (
     <div>
       <div className='overflow-x-auto'>
@@ -82,12 +142,14 @@ export default function HistoryPurchase() {
 <button onClick={() => onViewDetails(purchase)} className='bg-blue-400 text-white rounded-full px-6 py-2 text-sm font-semibold transition-transform transform hover:scale-105'>
         Xem chi tiết
       </button>
-      <button  className='bg-green-400 text-white rounded-full px-6 py-2 text-sm font-semibold transition-transform transform hover:scale-105'>
-        Xem thông tin thanh toán
-      </button>
-      <button  className='bg-yellow-500 text-white rounded-full px-6 py-2 text-sm font-semibold transition-transform transform hover:scale-105'>
-        xem thông tin vận chuyển
-      </button>
+      <button
+  onClick={() => purchase.id !== null && onViewPaymentInfo(purchase.id)}
+  className="bg-green-400 text-white rounded-full px-6 py-2 text-sm font-semibold transition-transform transform hover:scale-105"
+>
+  Xem thông tin thanh toán
+</button>
+
+
 </div>
     </div>
 
@@ -110,6 +172,11 @@ export default function HistoryPurchase() {
           </div>
         </div>
       </div>
+      <ModalComponent
+        isOpen={modalIsOpen}
+        onRequestClose={() => setModalIsOpen(false)}
+        paymentInfo={paymentInfo}
+      />
     </div>
   )
 }

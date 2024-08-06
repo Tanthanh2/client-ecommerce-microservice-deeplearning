@@ -166,9 +166,7 @@ export default function Order() {
                 <button className='bg-green-400 text-white rounded-full px-6 py-2 text-sm font-semibold transition-transform transform hover:scale-105'>
                   Xem thông tin thanh toán
                 </button>
-                <button className='bg-yellow-500 text-white rounded-full px-6 py-2 text-sm font-semibold transition-transform transform hover:scale-105'>
-                  Xem thông tin vận chuyển
-                </button>
+
               </div>
             </div>
 

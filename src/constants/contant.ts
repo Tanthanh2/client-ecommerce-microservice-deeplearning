@@ -1,3 +1,11 @@
+export interface PaymentInfo {
+  id: number;
+  paymentDate: string;
+  status: string;
+  method: string;
+  amount: number;
+}
+
 export interface Shop {
   id: number;
   name: string;

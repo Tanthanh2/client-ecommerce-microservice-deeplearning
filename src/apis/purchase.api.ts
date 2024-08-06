@@ -1,5 +1,5 @@
 import { get } from 'lodash'
-import { OrderItemRequest, OrderRequest } from 'src/constants/contant'
+import { OrderItemRequest, OrderRequest, PaymentInfo } from 'src/constants/contant'
 import { OrderItem } from 'src/types/order.type'
 import { Purchase, PurchaseListStatus } from 'src/types/purchase.type'
 import { SuccessResponse } from 'src/types/utils.type'
@@ -66,6 +66,10 @@ const purchaseApi = {
   //
   paymentMomo({ id, totalMoney }: { id: string; totalMoney: number }) {
     return http.post<MomoPaymentResponse>(`/api/v1/notifications/payment/`, { id, totalMoney }).then(response => response.data); // Trả về dữ liệu từ phản hồi;
+  }
+  ,
+  getPaymentByOrderId(id: number) {
+    return http.get<PaymentInfo>(`/api/v1/purchases/payments/order/${id}`)
   }
 
 }
