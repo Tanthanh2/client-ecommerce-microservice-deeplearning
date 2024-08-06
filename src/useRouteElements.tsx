@@ -10,6 +10,7 @@ import SellerLayout from './layouts/SellerLayout'
 import FormProduct from './pages/SellerPage/FormProduct'
 import DetailOrder from './pages/SellerPage/DetailOrder'
 import PromotionList from './pages/SellerPage/PromotionList/PromotionList'
+import DetailOrderU1 from './pages/User/pages/DetailOrderU1'
 
 
 const Login = lazy(() => import('./pages/Login'))
@@ -63,6 +64,14 @@ export default function useRouteElements() {
           element: (
             <SellerLayout>
               <DetailOrder />
+            </SellerLayout>
+          )
+        },
+        {
+          path: path.ordersellerdetail,
+          element: (
+            <SellerLayout>
+              <DetailOrderU1 />
             </SellerLayout>
           )
         },

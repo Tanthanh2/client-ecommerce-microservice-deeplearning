@@ -15,6 +15,7 @@ const path = {
 
   // seller page
   order: '/seller/order',
+  ordersellerdetail: '/seller/order/detail',
   detailorder: '/seller/order/:id',
   
   productlist: '/seller/product/list',

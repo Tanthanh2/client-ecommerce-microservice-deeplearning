@@ -1,17 +1,50 @@
-import React, { useState } from 'react';
+import { u } from 'msw/lib/glossary-de6278a9';
+import React, { useEffect, useState } from 'react';
+import { toast } from 'react-toastify';
+import ShopApi from 'src/apis/shop.api';
+import { Shop } from 'src/constants/contant';
 
 interface ShopFormProps {}
 
 const ShopProfile: React.FC<ShopFormProps> = () => {
-  const [formData, setFormData] = useState({
-    shopName: '',
-    shopAvatar: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRWBpWCt8mEim-vwUaNaijfL_YnH-r0fhzgDA&s',
-    shopDescription: '',
-    businessType: '',
-    businessAddress: '',
-    invoiceEmail: '',
-  });
 
+
+  useEffect(() => {
+    const fetchShopProfile = async () => {
+      const id = localStorage.getItem('id');
+      if (!id) return; // Kiểm tra xem ID có tồn tại không
+
+      try {
+        const response = await ShopApi.getShop(id);
+        const shopData = response.data; // Giả sử response.data chứa thông tin cửa hàng
+        setFormData({
+          id: shopData.id,
+          name: shopData.name,
+          description: shopData.description,
+          type: shopData.type,
+          city: shopData.city,
+          district: shopData.district,
+          ward: shopData.ward,
+          detailLocation: shopData.detailLocation
+        });
+      } catch (error) {
+        console.error("Error fetching shop profile:", error);
+      }
+    };
+
+    fetchShopProfile();
+  }, []);
+
+  const [formData, setFormData] = useState<Shop>({
+    id: 0,
+    name: '',
+    description: '',
+    type: '',
+    city: '',
+    district: '',
+    ward: '',
+    detailLocation: ''
+  });
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData({
@@ -20,10 +53,16 @@ const ShopProfile: React.FC<ShopFormProps> = () => {
     });
   };
 
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    toast.success('TÍNH NĂNG NÀY CHƯA PHÁT TRIỂN TRONG DỰ ÁN NÀY!');
+    toast.success('VUI LÒNG LIÊN HỆ VỚI CHÚNG TÔI ĐỂ ĐƯỢC HỖ TRỢ!');
+  };
+
   return (
     <div className="max-w-2xl mx-auto p-8 bg-white shadow-md rounded-lg">
       <h2 className="text-2xl font-bold mb-6 text-center">Shop Information</h2>
-      <form className="space-y-6">
+      <form className="space-y-6" onSubmit={handleSubmit}>
         <div>
           <label htmlFor="shopName" className="block text-sm font-medium text-gray-700">
             Shop Name
@@ -32,7 +71,7 @@ const ShopProfile: React.FC<ShopFormProps> = () => {
             type="text"
             name="shopName"
             id="shopName"
-            value={formData.shopName}
+            value={formData.name}
             onChange={handleChange}
             className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
           />
@@ -45,20 +84,18 @@ const ShopProfile: React.FC<ShopFormProps> = () => {
             type="text"
             name="shopAvatar"
             id="shopAvatar"
-            value={formData.shopAvatar}
+            value="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRWBpWCt8mEim-vwUaNaijfL_YnH-r0fhzgDA&s"
             onChange={handleChange}
             placeholder="Enter image URL"
             className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
           />
-          {formData.shopAvatar && (
-            <div className="mt-4">
+       <div className="mt-4">
               <img
-                src={formData.shopAvatar}
+                src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRWBpWCt8mEim-vwUaNaijfL_YnH-r0fhzgDA&s"
                 alt="Shop Avatar"
                 className="w-32 h-32 object-cover rounded-full mx-auto shadow-md"
               />
             </div>
-          )}
         </div>
         <div>
           <label htmlFor="shopDescription" className="block text-sm font-medium text-gray-700">
@@ -67,7 +104,7 @@ const ShopProfile: React.FC<ShopFormProps> = () => {
           <textarea
             name="shopDescription"
             id="shopDescription"
-            value={formData.shopDescription}
+            value={formData.description}
             onChange={handleChange}
             rows={3}
             className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
@@ -81,7 +118,7 @@ const ShopProfile: React.FC<ShopFormProps> = () => {
             type="text"
             name="businessType"
             id="businessType"
-            value={formData.businessType}
+            value={formData.type}
             onChange={handleChange}
             className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
           />
@@ -94,24 +131,12 @@ const ShopProfile: React.FC<ShopFormProps> = () => {
             type="text"
             name="businessAddress"
             id="businessAddress"
-            value={formData.businessAddress}
+            value={`${formData.city}, ${formData.district}, ${formData.ward}, ${formData.detailLocation}`}
             onChange={handleChange}
             className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
           />
         </div>
-        <div>
-          <label htmlFor="invoiceEmail" className="block text-sm font-medium text-gray-700">
-            Email for Receiving Electronic Invoices
-          </label>
-          <input
-            type="email"
-            name="invoiceEmail"
-            id="invoiceEmail"
-            value={formData.invoiceEmail}
-            onChange={handleChange}
-            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-          />
-        </div>
+
         <div className="text-center">
           <button
             type="submit"

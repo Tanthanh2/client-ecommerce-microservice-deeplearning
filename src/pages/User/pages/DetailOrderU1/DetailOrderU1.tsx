@@ -9,7 +9,7 @@ import { Link } from 'react-router-dom';
 import path from 'src/constants/path';
 import { toast } from 'react-toastify';
 import productApi from 'src/apis/product.api';
-export default function DetailOrderU() {
+export default function DetailOrderU1() {
   const location = useLocation();
   const { purchase } = location.state as { purchase: OrderRequest };
   const [orderItems, setOrderItems] = useState<OrderItem[]>([]);

@@ -1,4 +1,4 @@
-import { ProductRequest, PromotionRequest } from 'src/constants/contant'
+import { ProductRequest, ProductReview, PromotionRequest } from 'src/constants/contant'
 import { Product, ProductList, ProductListConfig, Promotion } from 'src/types/product.type'
 import { SuccessResponse } from 'src/types/utils.type'
 import http from 'src/utils/http'
@@ -30,6 +30,9 @@ const productApi = {
     return http.patch<void>(`/api/v1/products/seller/${id}/public?isPublic=${status}`)
   },
 
+  getReview(id:string){
+    return http.get<ProductReview[]>(`/api/v1/products/review/product/${id}`).then((res) => res.data)
+  },
 
   updateProductBasic(id: string, data: any) {
     return http.put<SuccessResponse<Product>>(`/api/v1/products/seller/${id}/basic`, data)
@@ -52,11 +55,12 @@ const productApi = {
   },
 
 
-
-
-
   addPromotion(data:PromotionRequest){
     return http.post<string>("/api/v1/products/promotions/", data)
+  },
+
+  addpreview(data: any){
+    return http.post<any>("/api/v1/products/review/", data)
   },
 
   async getPromotionsByIdShop(idShop: string) {
@@ -73,6 +77,8 @@ const productApi = {
     const response = await http.get<Promotion[]>(`/api/v1/products/promotions/product/${idProduct}/active`);
     return response.data; // Trả về dữ liệu sản phẩm từ phản hồi
   },
+
+
   
 }
 export default productApi

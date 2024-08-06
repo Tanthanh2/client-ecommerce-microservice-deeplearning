@@ -1,3 +1,24 @@
+export interface Shop {
+  id: number;
+  name: string;
+  description: string;
+  type: string;
+  city: string;
+  district: string;
+  ward: string;
+  detailLocation: string;
+}
+
+
+export interface ProductReview {
+  id: number;
+  idCustomer: number;
+  rating: number;
+  comment: string;
+  createdAt: string; // Hoặc có thể sử dụng Date nếu bạn muốn
+}
+
+
 export interface PromotionRequest {
   id: number | null; // Assuming id can be null or a number
   name: string;

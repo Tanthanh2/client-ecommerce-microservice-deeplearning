@@ -15,6 +15,7 @@ import path from 'src/constants/path'
 import { Helmet } from 'react-helmet-async'
 import { convert } from 'html-to-text'
 import { Head } from 'src/components/head'
+import { ProductReview } from 'src/constants/contant'
 
 export default function ProductDetail() {
   const queryClient = useQueryClient()
@@ -85,11 +86,21 @@ const addToCartMutation = useMutation<any, unknown, AddToCartPayload>(
 
   
   const navigate = useNavigate()
-
+  const [review, setReview] = useState<ProductReview[] | []>([])
   useEffect(() => {
     if (product && product.images.length > 0) {
       setActiveImage(product.images[0])
     }
+    const fetchReviews = async () => {
+      try {
+        const data = await productApi.getReview(product?.id.toString() as string);
+        setReview(data);
+      } catch (error) {
+        console.error("Error fetching reviews:", error);
+      }
+    };
+
+    fetchReviews();
   }, [product])
 
   const next = () => {
@@ -434,6 +445,26 @@ const addToCartMutation = useMutation<any, unknown, AddToCartPayload>(
               ))}
             </div>
           )}
+        </div>
+
+        <div className='container'>
+          <div className='uppercase text-gray-400'>Review sản phẩm</div>
+          {review.length === 0 ? (
+                <p className="text-gray-500">Chưa có đánh giá nào.</p>
+            ) : (
+                <ul className="space-y-4">
+                    {review.map((review1) => (
+                        <li key={review1.id} className="border p-4 rounded-lg shadow">
+                            <div className="flex justify-between mb-2">
+                                <div className="font-bold">Khách hàng ID: {review1.idCustomer}</div>
+                                <div className="text-yellow-500">{`⭐️ ${review1.rating}`}</div>
+                            </div>
+                            <p className="text-gray-700">{review1.comment}</p>
+                            <p className="text-gray-500 text-sm">{new Date(review1.createdAt).toLocaleString()}</p>
+                        </li>
+                    ))}
+                </ul>
+            )}
         </div>
       </div>
     </div>

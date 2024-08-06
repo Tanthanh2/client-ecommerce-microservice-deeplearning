@@ -46,6 +46,9 @@ const purchaseApi = {
   },
   getOrder(id:string, status:string){
     return http.get<OrderRequest[]>(`/api/v1/purchases/orders/customer/${id}?status=${status}`)
+  },
+  getOrderShop(id:string, status:string){
+    return http.get<OrderRequest[]>(`/api/v1/purchases/orders/shop/${id}?status=${status}`)
   }
   ,
   getOrderDetailItem(data: OrderItemRequest[]){
