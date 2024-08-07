@@ -1,3 +1,4 @@
+import OrderDelivered from "src/pages/OrderDelivered"
 
 const path = {
   home: '/',
@@ -37,6 +38,8 @@ const path = {
 
 
 
+  shipper:'/shipper',
+  OrderDelivered:'/shipper/order-delivered',
 
 
 } as const

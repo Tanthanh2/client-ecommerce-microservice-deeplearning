@@ -11,6 +11,8 @@ import FormProduct from './pages/SellerPage/FormProduct'
 import DetailOrder from './pages/SellerPage/DetailOrder'
 import PromotionList from './pages/SellerPage/PromotionList/PromotionList'
 import DetailOrderU1 from './pages/User/pages/DetailOrderU1'
+import Shipper from './pages/Shipper'
+import OrderDelivered from './pages/OrderDelivered'
 
 
 const Login = lazy(() => import('./pages/Login'))
@@ -89,6 +91,18 @@ export default function useRouteElements() {
             <SellerLayout>
               <FormProduct />
             </SellerLayout>
+          )
+        },
+        {
+          path: path.shipper,
+          element: (
+            <Shipper/>
+          )
+        },
+        {
+          path: path.OrderDelivered,
+          element: (
+            <OrderDelivered/>
           )
         },
         {

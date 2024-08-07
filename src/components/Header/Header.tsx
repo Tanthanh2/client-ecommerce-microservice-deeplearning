@@ -122,6 +122,12 @@ export default function Header() {
     fecthShopCheck()
   };
 
+  const handleNavLinkClick1 = () => {
+
+    navigate('/shipper');
+
+  };
+
         // Example POST request
 
   const checkShopExistsMutation = useMutation({
@@ -153,6 +159,7 @@ export default function Header() {
         <div className='flex items-center justify-between'>
           <div className='flex justify-start gap-x-3'>
           <p className='cursor-pointer' onClick={handleNavLinkClick}>Seller Center</p>
+          <p className='cursor-pointer' onClick={handleNavLinkClick1}>Giao diện demoshipper</p>
             <p>Download</p>
             <div className='flex'>
               <svg

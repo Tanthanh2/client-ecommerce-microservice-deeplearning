@@ -75,6 +75,14 @@ export default function Order() {
     mutation.mutate({ id: orderId, status: newStatus });
   };
 
+
+  const handleCancelOrder1 = (purchase: OrderRequest) => {
+    const orderId = purchase.id?.toString() || '0';
+    const newStatus = 'waitForGetting';
+    console.log(orderId, newStatus);
+    mutation.mutate({ id: orderId, status: newStatus });
+  };
+
   const purchaseTabsLink = purchaseTabs.map((tab) => (
     <Link
       key={tab.status}
@@ -192,6 +200,12 @@ export default function Order() {
                 {purchase.status === 'waitForConfirmation' && (
                 <button onClick={() => handleCancelOrder(purchase)} className='bg-red-500 text-white rounded px-4 py-2 text-sm font-semibold transition-transform transform hover:scale-105'>
                   Hủy đơn
+                </button>
+                 )}
+
+                {purchase.status === 'waitForConfirmation' && (
+                <button onClick={() => handleCancelOrder1(purchase)} className='bg-red-500 text-white rounded px-4 py-2 text-sm font-semibold transition-transform transform hover:scale-105'>
+                  Xác nhận đơn hàng
                 </button>
                  )}
               </div>

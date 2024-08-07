@@ -128,6 +128,14 @@ export default function Payment() {
 
     const orderData = createOrderData();
     console.log('Order Data:', orderData);
+    if(profile?.city == null || profile?.district == null || profile?.ward == null){
+      toast.warning("Vui lòng cập nhật địa chỉ của bạn trước khi đặt hàng")
+      return
+    }
+    if(profile?.city == '' || profile?.district == '' || profile?.ward == ''){
+      toast.warning("Vui lòng cập nhật địa chỉ của bạn trước khi đặt hàng")
+      return
+    }
     mutation.mutate(orderData);
 
   };

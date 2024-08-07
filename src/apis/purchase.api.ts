@@ -44,8 +44,14 @@ const purchaseApi = {
   addOrder(data: OrderRequest) {
     return http.post<string>(`/api/v1/purchases/orders/`, data).then((res) => res.data)
   },
+  addpayment(data:any){
+    return http.post<any>(`/api/v1/purchases/payments`, data).then((res) => res.data)
+  },
   getOrder(id:string, status:string){
     return http.get<OrderRequest[]>(`/api/v1/purchases/orders/customer/${id}?status=${status}`)
+  },
+  getOrderStatus(status:string){
+    return http.get<OrderRequest[]>(`/api/v1/purchases/orders/status/${status}`)
   },
   getOrderShop(id:string, status:string){
     return http.get<OrderRequest[]>(`/api/v1/purchases/orders/shop/${id}?status=${status}`)
