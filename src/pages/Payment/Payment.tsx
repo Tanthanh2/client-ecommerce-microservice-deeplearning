@@ -10,8 +10,6 @@ import { OrderItemRequest, OrderRequest } from 'src/constants/contant';
 import { Promotion } from 'src/types/product.type';
 import { toast } from 'react-toastify';
 import productApi from 'src/apis/product.api';
-import { set } from 'lodash';
-import { number } from 'yup';
 import purchaseApi from 'src/apis/purchase.api';
 import { useNavigate } from 'react-router-dom';
 

@@ -16,57 +16,13 @@ import Popover from '../Popover'
 import { locales } from 'src/i18n/i18n'
 import { useTranslation } from 'react-i18next'
 
+
+
 const MAX_PURCHASES = 5
-interface SearchResult {
-  imageUrl: string;
-  name: string;
-}
+
+
+
 export default function Header() {
-
-
-
-
-
-  const [image, setImage] = useState<File | null>(null);
-  const [results, setResults] = useState<SearchResult[]>([]);
-  const [preview, setPreview] = useState<string | null>(null);
-
-  const handleImageChange = (event: ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files && event.target.files[0]) {
-      const selectedImage = event.target.files[0];
-      setImage(selectedImage);
-      setPreview(URL.createObjectURL(selectedImage));
-    }
-  };
-
-  const handleSubmit = async (event: FormEvent) => {
-    event.preventDefault();
-
-    if (!image) {
-      alert("Please select an image first");
-      return;
-    }
-
-    const formData = new FormData();
-    formData.append('image', image);
-
-    try {
-      const response = await fetch('https://your-api-url.com/search-by-image', {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to search image');
-      }
-
-      const result: SearchResult[] = await response.json();
-      setResults(result);
-    } catch (error) {
-      console.error('Error:', error);
-    }
-  };
-
 
 
   const { i18n } = useTranslation()
@@ -153,9 +109,11 @@ export default function Header() {
 };
 
 
+
+
   return (
-    <div className='sticky top-0 z-20 bg-[linear-gradient(-180deg,#f53d2d,#f63)]  pt-2 text-white transition-[transform.2scubic-bezier(.4,0,.2,1)]'>
-      <div className='container'>
+    <div className='sticky h-32 top-0 z-20 bg-[linear-gradient(-180deg,#f53d2d,#f63)]  pt-2 text-white transition-[transform.2scubic-bezier(.4,0,.2,1)]'>
+      <div className='container '>
         <div className='flex items-center justify-between'>
           <div className='flex justify-start gap-x-3'>
           <p className='cursor-pointer' onClick={handleNavLinkClick}>Seller Center</p>
@@ -378,31 +336,8 @@ export default function Header() {
           </div>
         </div>
       </div>
-      <div className='mt-2 ml-16 p-2 flex'>
-        <form onSubmit={handleSubmit} className="relative bg-white rounded-lg shadow-md h-54 p-2">
-          <h1 className='text-black absolute -top-3 bg-green-500 rounded '>Tìm sản phẩm theo hình ảnh</h1>
-        <input 
-          type="file" 
-          accept="image/*" 
-          onChange={handleImageChange} 
-          className="border border-gray-300 rounded"
-        />
-        <button 
-          type="submit" 
-          className=" bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded"
-        >
-          Search
-        </button>
-      
-        </form>
-        <div>
-        {preview && (
-          <div className="mx-2">
-            <img src={preview} alt="Selected" className="w-54 h-54 object-cover rounded"/>
-          </div>
-        )}
-        </div>
-      </div>
+
+
     </div>
   )
 }

@@ -82,4 +82,5 @@ export interface ProductListConfig {
   price_min?: number | string
   name?: string
   category?: string
+  deeplearning?:string
 }
